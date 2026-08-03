@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 from html.parser import HTMLParser
@@ -22,7 +23,7 @@ PUBLIC_PAGES = (
     "sources.html",
     "design-system.html",
 )
-ERROR_PAGE = "404.html"
+ALL_PAGES = (*PUBLIC_PAGES, "404.html")
 
 
 @dataclass
@@ -46,49 +47,37 @@ class SiteHTMLParser(HTMLParser):
     def __init__(self, path: Path) -> None:
         super().__init__(convert_charrefs=True)
         self.report = PageReport(path=path)
-        self._capture_title = False
-        self._capture_h1 = False
-        self._capture_json_ld = False
-        self._title_parts: list[str] = []
-        self._h1_parts: list[str] = []
-        self._json_ld_parts: list[str] = []
+        self.capture_title = False
+        self.capture_h1 = False
+        self.capture_json_ld = False
+        self.title_parts: list[str] = []
+        self.h1_parts: list[str] = []
+        self.json_ld_parts: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = {name: value or "" for name, value in attrs}
         if tag == "html":
             self.report.lang = values.get("lang")
-        if tag == "title":
-            self._capture_title = True
-            self._title_parts = []
-        if tag == "h1":
-            self._capture_h1 = True
-            self._h1_parts = []
-        if tag == "main":
+        elif tag == "title":
+            self.capture_title = True
+            self.title_parts = []
+        elif tag == "h1":
+            self.capture_h1 = True
+            self.h1_parts = []
+        elif tag == "main":
             self.report.main_count += 1
-        if element_id := values.get("id"):
+
+        element_id = values.get("id")
+        if element_id:
             self.report.ids.append(element_id)
+
         if tag == "meta":
-            name = values.get("name", "").lower()
-            prop = values.get("property", "").lower()
-            content = values.get("content", "").strip()
-            if name == "description" and content:
-                self.report.descriptions.append(content)
-            if prop == "og:image" and content:
-                self.report.og_images.append(content)
-        if tag == "link":
-            rel = {part.lower() for part in values.get("rel", "").split()}
-            href = values.get("href", "").strip()
-            if "canonical" in rel and href:
-                self.report.canonicals.append(href)
-            if href:
-                self._record_reference("href", href)
-        if tag == "a":
-            href = values.get("href", "").strip()
-            if href:
-                self._record_reference("href", href)
-                classes = set(values.get("class", "").split())
-                if "skip-link" in classes:
-                    self.report.skip_links.append(href)
+            self._handle_meta(values)
+        elif tag == "link":
+            self._handle_link(values)
+        elif tag == "a":
+            self._handle_anchor(values)
+
         if tag in {"img", "script", "source"}:
             src = values.get("src", "").strip()
             if src:
@@ -96,36 +85,65 @@ class SiteHTMLParser(HTMLParser):
         if tag == "img":
             self.report.images.append(values)
         if tag == "script" and values.get("type", "").lower() == "application/ld+json":
-            self._capture_json_ld = True
-            self._json_ld_parts = []
+            self.capture_json_ld = True
+            self.json_ld_parts = []
 
     def handle_endtag(self, tag: str) -> None:
-        if tag == "title" and self._capture_title:
-            self.report.title = " ".join("".join(self._title_parts).split())
-            self._capture_title = False
-        if tag == "h1" and self._capture_h1:
-            text = " ".join("".join(self._h1_parts).split())
-            self.report.headings_one.append(text)
-            self._capture_h1 = False
-        if tag == "script" and self._capture_json_ld:
-            block = "".join(self._json_ld_parts).strip()
+        if tag == "title" and self.capture_title:
+            self.report.title = normalize_text(self.title_parts)
+            self.capture_title = False
+        elif tag == "h1" and self.capture_h1:
+            self.report.headings_one.append(normalize_text(self.h1_parts))
+            self.capture_h1 = False
+        elif tag == "script" and self.capture_json_ld:
+            block = "".join(self.json_ld_parts).strip()
             if block:
                 self.report.json_ld_blocks.append(block)
-            self._capture_json_ld = False
+            self.capture_json_ld = False
 
     def handle_data(self, data: str) -> None:
-        if self._capture_title:
-            self._title_parts.append(data)
-        if self._capture_h1:
-            self._h1_parts.append(data)
-        if self._capture_json_ld:
-            self._json_ld_parts.append(data)
+        if self.capture_title:
+            self.title_parts.append(data)
+        if self.capture_h1:
+            self.h1_parts.append(data)
+        if self.capture_json_ld:
+            self.json_ld_parts.append(data)
+
+    def _handle_meta(self, values: dict[str, str]) -> None:
+        content = values.get("content", "").strip()
+        if not content:
+            return
+        if values.get("name", "").lower() == "description":
+            self.report.descriptions.append(content)
+        if values.get("property", "").lower() == "og:image":
+            self.report.og_images.append(content)
+
+    def _handle_link(self, values: dict[str, str]) -> None:
+        href = values.get("href", "").strip()
+        if not href:
+            return
+        rel = {part.lower() for part in values.get("rel", "").split()}
+        if "canonical" in rel:
+            self.report.canonicals.append(href)
+        self._record_reference("href", href)
+
+    def _handle_anchor(self, values: dict[str, str]) -> None:
+        href = values.get("href", "").strip()
+        if not href:
+            return
+        self._record_reference("href", href)
+        if "skip-link" in values.get("class", "").split():
+            self.report.skip_links.append(href)
 
     def _record_reference(self, attribute: str, value: str) -> None:
         parsed = urlparse(value)
         if parsed.scheme or parsed.netloc or value.startswith(("mailto:", "tel:", "data:")):
             return
         self.report.local_refs.append((attribute, value))
+
+
+def normalize_text(parts: list[str]) -> str:
+    return " ".join("".join(parts).split())
 
 
 def parse_html(path: Path) -> PageReport:
@@ -138,15 +156,21 @@ def parse_html(path: Path) -> PageReport:
 def resolve_local_reference(page: Path, reference: str) -> tuple[Path, str]:
     parsed = urlparse(reference)
     raw_path = unquote(parsed.path)
-    target = page if not raw_path else (ROOT / raw_path.lstrip("/")) if raw_path.startswith("/") else page.parent / raw_path
+    if not raw_path:
+        target = page
+    elif raw_path.startswith("/"):
+        target = ROOT / raw_path.lstrip("/")
+    else:
+        target = page.parent / raw_path
     if target.is_dir():
-        target = target / "index.html"
+        target /= "index.html"
     return target.resolve(), parsed.fragment
 
 
 def validate_page(report: PageReport, *, require_canonical: bool) -> list[str]:
     errors: list[str] = []
     relative = report.path.relative_to(ROOT)
+
     if report.lang != "en":
         errors.append(f"{relative}: html lang must be 'en'")
     if not report.title:
@@ -163,9 +187,10 @@ def validate_page(report: PageReport, *, require_canonical: bool) -> list[str]:
         errors.append(f"{relative}: expected one main landmark, found {report.main_count}")
     if not report.skip_links:
         errors.append(f"{relative}: missing skip link")
-    duplicates = sorted({element_id for element_id in report.ids if report.ids.count(element_id) > 1})
-    if duplicates:
-        errors.append(f"{relative}: duplicate ids: {', '.join(duplicates)}")
+
+    duplicate_ids = sorted(item for item, count in Counter(report.ids).items() if count > 1)
+    if duplicate_ids:
+        errors.append(f"{relative}: duplicate ids: {', '.join(duplicate_ids)}")
 
     for image in report.images:
         if "alt" not in image:
@@ -173,17 +198,28 @@ def validate_page(report: PageReport, *, require_canonical: bool) -> list[str]:
         if not image.get("src"):
             errors.append(f"{relative}: image missing src")
 
-    for block_number, block in enumerate(report.json_ld_blocks, start=1):
+    for number, block in enumerate(report.json_ld_blocks, start=1):
         try:
             json.loads(block)
         except json.JSONDecodeError as exc:
-            errors.append(f"{relative}: invalid JSON-LD block {block_number}: {exc}")
+            errors.append(f"{relative}: invalid JSON-LD block {number}: {exc}")
 
-    id_set = set(report.ids)
+    errors.extend(validate_local_references(report))
+    errors.extend(validate_og_images(report))
+
+    if require_canonical and report.canonicals and not report.canonicals[0].startswith(BASE_URL):
+        errors.append(f"{relative}: canonical must start with {BASE_URL}")
+    return errors
+
+
+def validate_local_references(report: PageReport) -> list[str]:
+    errors: list[str] = []
+    relative = report.path.relative_to(ROOT)
+    ids = set(report.ids)
     for attribute, reference in report.local_refs:
         target, fragment = resolve_local_reference(report.path, reference)
         if reference.startswith("#"):
-            if fragment not in id_set:
+            if fragment not in ids:
                 errors.append(f"{relative}: missing local fragment target {reference}")
             continue
         try:
@@ -193,51 +229,54 @@ def validate_page(report: PageReport, *, require_canonical: bool) -> list[str]:
             continue
         if not target.exists():
             errors.append(f"{relative}: missing local {attribute} target: {reference}")
+    return errors
 
-    for og_image in report.og_images:
-        parsed = urlparse(og_image)
-        if parsed.netloc == "bradleymatera.github.io" and parsed.path.startswith("/Office/"):
-            local_path = ROOT / parsed.path.removeprefix("/Office/")
-            if not local_path.exists():
-                errors.append(f"{relative}: missing local Open Graph image: {local_path.relative_to(ROOT)}")
 
-    if require_canonical and report.canonicals:
-        canonical = report.canonicals[0]
-        if not canonical.startswith(BASE_URL):
-            errors.append(f"{relative}: canonical must start with {BASE_URL}")
+def validate_og_images(report: PageReport) -> list[str]:
+    errors: list[str] = []
+    relative = report.path.relative_to(ROOT)
+    for image_url in report.og_images:
+        parsed = urlparse(image_url)
+        if parsed.netloc != "bradleymatera.github.io" or not parsed.path.startswith("/Office/"):
+            continue
+        local_path = ROOT / parsed.path.removeprefix("/Office/")
+        if not local_path.exists():
+            errors.append(f"{relative}: missing local Open Graph image: {local_path.relative_to(ROOT)}")
     return errors
 
 
 def validate_content_index() -> list[str]:
-    errors: list[str] = []
     path = ROOT / "data/aws-content.json"
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return [f"data/aws-content.json: unable to parse: {exc}"]
 
-    for collection_name in ("articles", "devArticles", "repositories"):
-        if not isinstance(data.get(collection_name), list) or not data[collection_name]:
-            errors.append(f"data/aws-content.json: {collection_name} must be a non-empty list")
+    errors: list[str] = []
+    for name in ("articles", "devArticles", "repositories"):
+        if not isinstance(data.get(name), list) or not data[name]:
+            errors.append(f"data/aws-content.json: {name} must be a non-empty list")
 
     article_ids: set[str] = set()
     article_urls: set[str] = set()
     for article in data.get("articles", []):
         article_id = article.get("id")
-        url = article.get("url")
+        article_url = article.get("url")
         if not article_id or article_id in article_ids:
             errors.append(f"data/aws-content.json: missing or duplicate article id {article_id!r}")
         article_ids.add(article_id)
-        if not url or url in article_urls:
-            errors.append(f"data/aws-content.json: missing or duplicate article URL {url!r}")
-        article_urls.add(url)
+        if not article_url or article_url in article_urls:
+            errors.append(f"data/aws-content.json: missing or duplicate article URL {article_url!r}")
+        article_urls.add(article_url)
+
         try:
             published = date.fromisoformat(article["date"])
         except (KeyError, TypeError, ValueError):
             errors.append(f"data/aws-content.json: invalid date for article {article_id!r}")
-        else:
-            if published > AUDIT_DATE:
-                errors.append(f"data/aws-content.json: future-dated article {article_id!r}: {published}")
+            continue
+        if published > AUDIT_DATE:
+            errors.append(f"data/aws-content.json: future-dated article {article_id!r}: {published}")
+
         image = article.get("image")
         if not image or not (ROOT / image).exists():
             errors.append(f"data/aws-content.json: missing article image for {article_id!r}: {image!r}")
@@ -247,9 +286,8 @@ def validate_content_index() -> list[str]:
 def validate_xml_files() -> list[str]:
     errors: list[str] = []
     for relative in ("sitemap.xml", "rss.xml"):
-        path = ROOT / relative
         try:
-            ElementTree.parse(path)
+            ElementTree.parse(ROOT / relative)
         except (OSError, ElementTree.ParseError) as exc:
             errors.append(f"{relative}: invalid XML: {exc}")
     return errors
@@ -257,15 +295,13 @@ def validate_xml_files() -> list[str]:
 
 def validate_support_files() -> list[str]:
     errors: list[str] = []
-    manifest = ROOT / "site.webmanifest"
     try:
-        json.loads(manifest.read_text(encoding="utf-8"))
+        json.loads((ROOT / "site.webmanifest").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"site.webmanifest: invalid JSON: {exc}")
 
     robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
-    expected_sitemap = f"Sitemap: {BASE_URL}sitemap.xml"
-    if expected_sitemap not in robots:
+    if f"Sitemap: {BASE_URL}sitemap.xml" not in robots:
         errors.append("robots.txt: missing canonical sitemap declaration")
 
     required = (
@@ -279,6 +315,7 @@ def validate_support_files() -> list[str]:
         "humans.txt",
         "styles.css",
         "hub.css",
+        "assets/og/aws-metadata-workflow.png",
     )
     for relative in required:
         if not (ROOT / relative).exists():
@@ -288,27 +325,38 @@ def validate_support_files() -> list[str]:
 
 def validate_svg_accessibility() -> list[str]:
     errors: list[str] = []
-    for directory in (ROOT / "assets", ROOT / "assets/content"):
-        if not directory.exists():
+    svg_paths = list((ROOT / "assets").glob("*.svg"))
+    svg_paths.extend((ROOT / "assets/content").glob("*.svg"))
+    for path in svg_paths:
+        try:
+            root = ElementTree.parse(path).getroot()
+        except ElementTree.ParseError as exc:
+            errors.append(f"{path.relative_to(ROOT)}: invalid SVG XML: {exc}")
             continue
-        for path in directory.glob("*.svg"):
-            try:
-                root = ElementTree.parse(path).getroot()
-            except ElementTree.ParseError as exc:
-                errors.append(f"{path.relative_to(ROOT)}: invalid SVG XML: {exc}")
-                continue
-            namespace = "{http://www.w3.org/2000/svg}"
-            if root.find(f"{namespace}title") is None:
-                errors.append(f"{path.relative_to(ROOT)}: missing SVG title")
-            if root.find(f"{namespace}desc") is None:
-                errors.append(f"{path.relative_to(ROOT)}: missing SVG description")
+        namespace = "{http://www.w3.org/2000/svg}"
+        if root.find(f"{namespace}title") is None:
+            errors.append(f"{path.relative_to(ROOT)}: missing SVG title")
+        if root.find(f"{namespace}desc") is None:
+            errors.append(f"{path.relative_to(ROOT)}: missing SVG description")
     return errors
+
+
+def duplicate_value_errors(reports: list[PageReport], attribute: str, label: str) -> list[str]:
+    values: dict[str, list[str]] = {}
+    for report in reports:
+        for value in getattr(report, attribute):
+            values.setdefault(value, []).append(str(report.path.relative_to(ROOT)))
+    return [
+        f"duplicate {label} {value!r}: {', '.join(pages)}"
+        for value, pages in values.items()
+        if value and len(pages) > 1
+    ]
 
 
 def main() -> int:
     errors: list[str] = []
     reports: list[PageReport] = []
-    for relative in (*PUBLIC_PAGES, ERROR_PAGE):
+    for relative in ALL_PAGES:
         path = ROOT / relative
         if not path.exists():
             errors.append(f"missing public page: {relative}")
@@ -317,18 +365,12 @@ def main() -> int:
         reports.append(report)
         errors.extend(validate_page(report, require_canonical=relative in PUBLIC_PAGES))
 
-    title_map: dict[str, list[str]] = {}
-    canonical_map: dict[str, list[str]] = {}
-    for report in reports:
-        title_map.setdefault(report.title, []).append(str(report.path.relative_to(ROOT)))
-        for canonical in report.canonicals:
-            canonical_map.setdefault(canonical, []).append(str(report.path.relative_to(ROOT)))
-    for title, pages in title_map.items():
-        if title and len(pages) > 1:
-            errors.append(f"duplicate page title {title!r}: {', '.join(pages)}")
-    for canonical, pages in canonical_map.items():
-        if len(pages) > 1:
-            errors.append(f"duplicate canonical URL {canonical!r}: {', '.join(pages)}")
+    errors.extend(duplicate_value_errors(reports, "headings_one", "h1"))
+    errors.extend(duplicate_value_errors(reports, "canonicals", "canonical URL"))
+    title_counter = Counter(report.title for report in reports if report.title)
+    for title, count in title_counter.items():
+        if count > 1:
+            errors.append(f"duplicate page title {title!r}")
 
     errors.extend(validate_content_index())
     errors.extend(validate_xml_files())
@@ -341,10 +383,9 @@ def main() -> int:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print(
-        f"Static site validation passed: {len(reports)} HTML pages, "
-        f"{len(list((ROOT / 'assets').glob('*.svg'))) + len(list((ROOT / 'assets/content').glob('*.svg')))} SVG assets."
-    )
+    svg_count = len(list((ROOT / "assets").glob("*.svg")))
+    svg_count += len(list((ROOT / "assets/content").glob("*.svg")))
+    print(f"Static site validation passed: {len(reports)} HTML pages, {svg_count} SVG assets.")
     return 0
 
 
