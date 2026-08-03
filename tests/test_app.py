@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
@@ -19,7 +19,6 @@ if str(SOURCE) not in sys.path:
 os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
 os.environ.setdefault("AWS_EC2_METADATA_DISABLED", "true")
 os.environ.setdefault("TABLE_NAME", "test-metadata-table")
-
 app = importlib.import_module("app")
 
 
@@ -40,15 +39,7 @@ class FakeTable:
 
     def put_item(self, **kwargs):
         if self.error_code:
-            raise ClientError(
-                {
-                    "Error": {
-                        "Code": self.error_code,
-                        "Message": "simulated table error",
-                    }
-                },
-                "PutItem",
-            )
+            raise ClientError({"Error": {"Code": self.error_code, "Message": "simulated table error"}}, "PutItem")
         self.items.append(kwargs["Item"])
         return {"ResponseMetadata": {"HTTPStatusCode": 200}}
 
@@ -61,26 +52,22 @@ def reset_clients(monkeypatch):
 
 @pytest.fixture
 def s3_event():
-    return {
-        "Records": [
-            {
-                "eventVersion": "2.1",
-                "eventSource": "aws:s3",
-                "eventName": "ObjectCreated:Put",
-                "eventTime": "2026-08-03T18:00:00.000Z",
-                "s3": {
-                    "bucket": {"name": "metadata-intake-bucket"},
-                    "object": {
-                        "key": "incoming%2Fquarterly+report.pdf",
-                        "size": 4096,
-                        "eTag": "event-etag",
-                        "versionId": "version-1",
-                        "sequencer": "0066AF001122334455",
-                    },
-                },
-            }
-        ]
-    }
+    return {"Records": [{
+        "eventVersion": "2.1",
+        "eventSource": "aws:s3",
+        "eventName": "ObjectCreated:Put",
+        "eventTime": "2026-08-03T18:00:00.000Z",
+        "s3": {
+            "bucket": {"name": "metadata-intake-bucket"},
+            "object": {
+                "key": "incoming%2Fquarterly+report.pdf",
+                "size": 4096,
+                "eTag": "event-etag",
+                "versionId": "version-1",
+                "sequencer": "0066AF001122334455",
+            },
+        },
+    }]}
 
 
 @pytest.fixture
@@ -89,7 +76,7 @@ def head_response():
         "ContentLength": 4096,
         "ContentType": "application/pdf",
         "ETag": '"head-etag"',
-        "LastModified": datetime(2026, 8, 3, 18, 0, tzinfo=timezone.utc),
+        "LastModified": datetime(2026, 8, 3, 18, 0, tzinfo=UTC),
         "StorageClass": "STANDARD",
         "VersionId": "version-1",
         "Metadata": {"department": "support"},
@@ -102,20 +89,11 @@ def test_lambda_handler_stores_normalized_metadata(monkeypatch, s3_event, head_r
     fake_table = FakeTable()
     monkeypatch.setattr(app, "_S3_CLIENT", fake_s3)
     monkeypatch.setattr(app, "_METADATA_TABLE", fake_table)
-
     result = app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-123"))
-
     assert result["processed"] == 1
     assert result["aws_request_id"] == "request-123"
     assert result["results"][0]["status"] == "created"
-    assert fake_s3.calls == [
-        {
-            "Bucket": "metadata-intake-bucket",
-            "Key": "incoming/quarterly report.pdf",
-            "VersionId": "version-1",
-        }
-    ]
-
+    assert fake_s3.calls == [{"Bucket": "metadata-intake-bucket", "Key": "incoming/quarterly report.pdf", "VersionId": "version-1"}]
     stored = fake_table.items[0]
     assert stored["Bucket"] == "metadata-intake-bucket"
     assert stored["ObjectKey"] == "incoming/quarterly report.pdf"
@@ -131,14 +109,8 @@ def test_lambda_handler_stores_normalized_metadata(monkeypatch, s3_event, head_r
 
 def test_duplicate_event_is_safe(monkeypatch, s3_event, head_response):
     monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
-    monkeypatch.setattr(
-        app,
-        "_METADATA_TABLE",
-        FakeTable(error_code="ConditionalCheckFailedException"),
-    )
-
+    monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable(error_code="ConditionalCheckFailedException"))
     result = app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-duplicate"))
-
     assert result["processed"] == 1
     assert result["results"][0]["status"] == "duplicate"
 
@@ -146,28 +118,19 @@ def test_duplicate_event_is_safe(monkeypatch, s3_event, head_response):
 def test_unexpected_table_error_is_retried_by_lambda(monkeypatch, s3_event, head_response):
     monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
     monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable(error_code="AccessDeniedException"))
-
     with pytest.raises(RuntimeError, match="One or more records failed"):
         app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-denied"))
 
 
 def test_unversioned_object_uses_event_etag_and_default_fields(monkeypatch, s3_event):
     del s3_event["Records"][0]["s3"]["object"]["versionId"]
-    head = {"ContentLength": 12, "Metadata": {}}
-    fake_s3 = FakeS3Client(head)
+    fake_s3 = FakeS3Client({"ContentLength": 12, "Metadata": {}})
     fake_table = FakeTable()
     monkeypatch.setattr(app, "_S3_CLIENT", fake_s3)
     monkeypatch.setattr(app, "_METADATA_TABLE", fake_table)
-
     result = app.lambda_handler(s3_event, None)
-
     assert result["aws_request_id"] is None
-    assert fake_s3.calls == [
-        {
-            "Bucket": "metadata-intake-bucket",
-            "Key": "incoming/quarterly report.pdf",
-        }
-    ]
+    assert fake_s3.calls == [{"Bucket": "metadata-intake-bucket", "Key": "incoming/quarterly report.pdf"}]
     stored = fake_table.items[0]
     assert stored["ETag"] == "event-etag"
     assert stored["ContentType"] == "application/octet-stream"
@@ -180,7 +143,6 @@ def test_rejects_non_s3_event(monkeypatch, s3_event, head_response):
     s3_event["Records"][0]["eventSource"] = "aws:sns"
     monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
     monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable())
-
     with pytest.raises(RuntimeError, match="One or more records failed"):
         app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-bad-source"))
 
@@ -189,7 +151,6 @@ def test_rejects_unsupported_event_major_version(monkeypatch, s3_event, head_res
     s3_event["Records"][0]["eventVersion"] = "3.0"
     monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
     monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable())
-
     with pytest.raises(RuntimeError, match="One or more records failed"):
         app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-bad-version"))
 
@@ -198,7 +159,6 @@ def test_rejects_invalid_event_version(monkeypatch, s3_event, head_response):
     s3_event["Records"][0]["eventVersion"] = "not-a-version"
     monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
     monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable())
-
     with pytest.raises(RuntimeError, match="One or more records failed"):
         app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-invalid-version"))
 
@@ -220,18 +180,8 @@ def test_lazy_clients_are_cached(monkeypatch):
     fake_resource = SimpleNamespace(Table=lambda name: fake_table)
     client_calls: list[str] = []
     resource_calls: list[str] = []
-
-    def client(service_name: str):
-        client_calls.append(service_name)
-        return fake_client
-
-    def resource(service_name: str):
-        resource_calls.append(service_name)
-        return fake_resource
-
-    monkeypatch.setattr(app.boto3, "client", client)
-    monkeypatch.setattr(app.boto3, "resource", resource)
-
+    monkeypatch.setattr(app.boto3, "client", lambda service_name: client_calls.append(service_name) or fake_client)
+    monkeypatch.setattr(app.boto3, "resource", lambda service_name: resource_calls.append(service_name) or fake_resource)
     assert app._get_s3_client() is fake_client
     assert app._get_s3_client() is fake_client
     assert app._get_metadata_table() is fake_table
