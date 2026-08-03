@@ -1,0 +1,19 @@
+/* TEAM */
+Creator: Bradley Matera
+Role: Full-Stack Software Engineer
+Portfolio: https://bradleymatera.dev/recruiter/
+GitHub: https://github.com/BradleyMatera
+LinkedIn: https://www.linkedin.com/in/bradmatera/
+
+/* SITE */
+Name: AWS Serverless Metadata Workflow
+Repository: https://github.com/BradleyMatera/Office
+Live site: https://bradleymatera.github.io/Office/
+Language: English
+Built with: HTML, CSS, SVG, Python, AWS SAM, CloudFormation
+Last major audit: 2026-08-03
+
+/* PURPOSE */
+A public reconstruction and expansion of an AWS Support Engineering internship capstone.
+The site prioritizes verifiable work, official AWS sources, accessible documentation,
+and explicit boundaries around training work versus production ownership.
