@@ -1,12 +1,12 @@
 {
   "name": "AWS Serverless Metadata Workflow",
   "short_name": "AWS Metadata",
-  "description": "Bradley Matera's deployable AWS internship capstone walkthrough, writing hub, proof map, and verified source library.",
+  "description": "An event-driven AWS project that turns Amazon S3 file uploads into normalized DynamoDB metadata records using AWS Lambda.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#071426",
-  "theme_color": "#071426",
+  "background_color": "#f2f3f3",
+  "theme_color": "#232f3e",
   "icons": [
     {
       "src": "favicon.svg",
