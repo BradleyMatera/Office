@@ -2,17 +2,23 @@ PYTHON ?= python3
 STACK_NAME ?= aws-serverless-metadata-workflow
 AWS_REGION ?= us-east-1
 
-.PHONY: install lint test validate build deploy outputs clean
+.PHONY: install compile lint test site validate build check deploy outputs clean
 
 install:
 	$(PYTHON) -m pip install --upgrade -r requirements-dev.txt
 
+compile:
+	$(PYTHON) -m compileall -q src tests scripts
+
 lint:
-	ruff check src tests
+	ruff check src tests scripts
 
 test:
 	AWS_DEFAULT_REGION=$(AWS_REGION) AWS_EC2_METADATA_DISABLED=true TABLE_NAME=test-metadata-table \
 		pytest --cov=src/metadata_extractor --cov-report=term-missing --cov-fail-under=85
+
+site:
+	$(PYTHON) scripts/validate_site.py
 
 validate:
 	sam validate --lint
@@ -20,7 +26,9 @@ validate:
 build:
 	sam build
 
-deploy: build
+check: compile lint test site validate build
+
+deploy: check
 	sam deploy --guided --stack-name $(STACK_NAME) --region $(AWS_REGION)
 
 outputs:
@@ -31,4 +39,5 @@ outputs:
 		--output table
 
 clean:
-	rm -rf .aws-sam .pytest_cache .coverage htmlcov
+	rm -rf .aws-sam .pytest_cache .ruff_cache .coverage htmlcov
+	find src tests scripts -type d -name __pycache__ -prune -exec rm -rf {} +
