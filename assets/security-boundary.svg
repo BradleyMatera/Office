@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Security Boundary and Data Flow</title>
+  <desc id="desc">Diagram showing a public GitHub Pages documentation site separated from the deployer's private AWS account. Inside the AWS boundary are an encrypted S3 bucket, Lambda function, DynamoDB table, CloudWatch monitoring, and encrypted SQS failure queue.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.title{font:700 34px Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Arial,sans-serif;fill:#475569}.boundary{fill:#eff6ff;stroke:#2563eb;stroke-width:3;stroke-dasharray:12 8}.public{fill:#fff;stroke:#94a3b8;stroke-width:2}.service{fill:#fff;stroke:#60a5fa;stroke-width:2}.secure{fill:#ecfdf5;stroke:#10b981;stroke-width:2}.warn{fill:#fff7ed;stroke:#f97316;stroke-width:2}.label{font:700 19px Arial,sans-serif;fill:#0f172a}.body{font:400 15px Arial,sans-serif;fill:#334155}.arrow{stroke:#2563eb;stroke-width:4;fill:none;marker-end:url(#blue)}.noarrow{stroke:#64748b;stroke-width:3;stroke-dasharray:8 7;fill:none}.tag{font:700 14px Arial,sans-serif;fill:#1e3a8a}
+    </style>
+    <marker id="blue" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#2563eb"/></marker>
+  </defs>
+  <rect class="bg" width="1200" height="760"/>
+  <text class="title" x="55" y="60">Security Boundary and Public-Safe Design</text>
+  <text class="sub" x="55" y="90">The documentation is public. AWS resources, credentials, uploaded objects, and metadata remain inside the deployer's account.</text>
+
+  <rect class="public" x="60" y="190" width="250" height="180" rx="22"/>
+  <text class="label" x="103" y="240">GitHub Pages</text>
+  <text class="body" x="92" y="275">Public architecture, code,</text>
+  <text class="body" x="88" y="298">sample data, and deployment</text>
+  <text class="body" x="113" y="321">documentation only</text>
+  <text class="tag" x="105" y="350">NO AWS CREDENTIALS</text>
+
+  <rect class="boundary" x="380" y="130" width="760" height="555" rx="30"/>
+  <text class="label" x="420" y="172">Private AWS Account Boundary</text>
+
+  <rect class="secure" x="430" y="220" width="210" height="130" rx="20"/>
+  <text class="label" x="484" y="265">Amazon S3</text>
+  <text class="body" x="462" y="292">Encrypted, versioned,</text>
+  <text class="body" x="451" y="315">public access blocked</text>
+
+  <rect class="service" x="735" y="220" width="210" height="130" rx="20"/>
+  <text class="label" x="785" y="265">AWS Lambda</text>
+  <text class="body" x="774" y="292">Least-privilege role</text>
+  <text class="body" x="766" y="315">No object-body download</text>
+
+  <rect class="secure" x="430" y="455" width="210" height="130" rx="20"/>
+  <text class="label" x="472" y="500">DynamoDB</text>
+  <text class="body" x="459" y="527">Encrypted metadata</text>
+  <text class="body" x="459" y="550">Point-in-time recovery</text>
+
+  <rect class="warn" x="735" y="455" width="210" height="130" rx="20"/>
+  <text class="label" x="794" y="500">SQS DLQ</text>
+  <text class="body" x="766" y="527">Encrypted failed events</text>
+  <text class="body" x="771" y="550">Controlled investigation</text>
+
+  <rect class="service" x="970" y="335" width="130" height="130" rx="20"/>
+  <text class="label" x="989" y="380">CloudWatch</text>
+  <text class="body" x="990" y="407">Logs, errors,</text>
+  <text class="body" x="994" y="430">alarm signal</text>
+
+  <path class="arrow" d="M640 285 H735"/>
+  <path class="arrow" d="M840 350 V410 H640 V455"/>
+  <path class="arrow" d="M840 350 V455"/>
+  <path class="noarrow" d="M945 285 H1035 V335"/>
+  <path class="noarrow" d="M945 520 H1035 V465"/>
+  <path class="noarrow" d="M310 280 H380"/>
+  <text class="body" x="315" y="258">Documentation only</text>
+  <text class="body" x="675" y="202">Object-created event</text>
+  <text class="body" x="648" y="430">Conditional metadata write</text>
+  <text class="body" x="793" y="430">After retries fail</text>
+</svg>
