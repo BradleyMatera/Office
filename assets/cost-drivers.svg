@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Cloud Cost Drivers</title>
+  <desc id="desc">Diagram showing the measurable cost drivers for S3, Lambda, DynamoDB, SQS, CloudWatch, and the static documentation site.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.title{font:700 34px Arial,sans-serif;fill:#0f172a}.sub{font:400 17px Arial,sans-serif;fill:#475569}.center{fill:#1e3a8a}.centerText{font:700 25px Arial,sans-serif;fill:white}.card{fill:white;stroke:#cbd5e1;stroke-width:2}.service{font:700 20px Arial,sans-serif;fill:#0f172a}.body{font:400 15px Arial,sans-serif;fill:#334155}.line{stroke:#2563eb;stroke-width:3}.note{fill:#dbeafe;stroke:#60a5fa;stroke-width:2}.noteText{font:700 17px Arial,sans-serif;fill:#1e3a8a}
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="760"/>
+  <text class="title" x="55" y="62">Usage-Based Cost Model</text>
+  <text class="sub" x="55" y="92">The architecture can be explained through measurable requests, duration, storage, and retention instead of vague cost claims.</text>
+
+  <circle class="center" cx="600" cy="385" r="120"/>
+  <text class="centerText" x="532" y="374">Workflow</text>
+  <text class="centerText" x="520" y="407">Cost Drivers</text>
+
+  <rect class="card" x="70" y="165" width="260" height="150" rx="20"/>
+  <text class="service" x="158" y="205">Amazon S3</text>
+  <text class="body" x="105" y="238">• Stored object bytes</text>
+  <text class="body" x="105" y="264">• PUT, GET, LIST requests</text>
+  <text class="body" x="105" y="290">• Version retention</text>
+
+  <rect class="card" x="470" y="115" width="260" height="150" rx="20"/>
+  <text class="service" x="540" y="155">AWS Lambda</text>
+  <text class="body" x="505" y="188">• Invocation count</text>
+  <text class="body" x="505" y="214">• Execution duration</text>
+  <text class="body" x="505" y="240">• Memory allocation</text>
+
+  <rect class="card" x="870" y="165" width="260" height="150" rx="20"/>
+  <text class="service" x="950" y="205">DynamoDB</text>
+  <text class="body" x="905" y="238">• Conditional writes</text>
+  <text class="body" x="905" y="264">• Reads and scans</text>
+  <text class="body" x="905" y="290">• Item storage and PITR</text>
+
+  <rect class="card" x="70" y="485" width="260" height="150" rx="20"/>
+  <text class="service" x="177" y="525">SQS</text>
+  <text class="body" x="105" y="558">• Failed-event messages</text>
+  <text class="body" x="105" y="584">• Receive and delete calls</text>
+  <text class="body" x="105" y="610">• Message retention</text>
+
+  <rect class="card" x="470" y="535" width="260" height="150" rx="20"/>
+  <text class="service" x="535" y="575">CloudWatch</text>
+  <text class="body" x="505" y="608">• Log ingestion</text>
+  <text class="body" x="505" y="634">• Log retention</text>
+  <text class="body" x="505" y="660">• Metrics and alarms</text>
+
+  <rect class="card" x="870" y="485" width="260" height="150" rx="20"/>
+  <text class="service" x="930" y="525">Public Site</text>
+  <text class="body" x="905" y="558">• GitHub Pages hosting</text>
+  <text class="body" x="905" y="584">• Static asset transfer</text>
+  <text class="body" x="905" y="610">• No live AWS API access</text>
+
+  <line class="line" x1="330" y1="270" x2="500" y2="335"/>
+  <line class="line" x1="600" y1="265" x2="600" y2="265"/>
+  <line class="line" x1="870" y1="270" x2="700" y2="335"/>
+  <line class="line" x1="330" y1="560" x2="500" y2="440"/>
+  <line class="line" x1="600" y1="535" x2="600" y2="505"/>
+  <line class="line" x1="870" y1="560" x2="700" y2="440"/>
+
+  <rect class="note" x="400" y="706" width="400" height="38" rx="19"/>
+  <text class="noteText" x="452" y="731">Low traffic means low service usage</text>
+</svg>
