@@ -2,18 +2,12 @@
 
 ## Purpose
 
-The workflow turns an S3 object-created event into a normalized DynamoDB metadata record without running an always-on application server or downloading the uploaded file body.
+The workflow turns an Amazon S3 object-created event into a normalized Amazon DynamoDB metadata record without running an always-on application server or downloading the uploaded file body.
 
-The public repository also turns the original internship capstone into a permanent resume-facing AWS hub with:
+The repository contains two connected parts:
 
-- deployable infrastructure
-- tested Lambda behavior
-- operations and cleanup documentation
-- canonical AWS writing teasers
-- public proof mapping
-- official AWS source verification
-- a documented design system
-- production static-site validation
+1. a deployable AWS SAM implementation of the workflow
+2. a static project site that explains the architecture, code, operational behavior, evidence, AWS references, and related writing
 
 ## Processing sequence
 
@@ -29,7 +23,7 @@ The public repository also turns the original internship capstone into a permane
 10. The function records a structured `created` or `duplicate` outcome.
 11. Unexpected failures are raised so Lambda can retry and eventually send the failed invocation to SQS.
 
-## Lambda module structure
+## Lambda module
 
 The public implementation is intentionally small enough to inspect in one file:
 
@@ -39,22 +33,22 @@ src/metadata_extractor/app.py
 
 Main responsibilities:
 
-- `_get_s3_client()` — lazily creates and reuses the S3 client
-- `_get_metadata_table()` — lazily creates and reuses the DynamoDB table resource
-- `_isoformat()` — normalizes timestamps
-- `_record_id()` — creates deterministic identity
-- `_validate_event_version()` — enforces the supported major version
-- `_head_object()` — builds version-aware S3 requests
-- `_normalize_item()` — creates the DynamoDB item
-- `_store_item()` — performs the conditional write and handles duplicates
-- `process_record()` — processes one S3 event record
-- `lambda_handler()` — validates the batch, aggregates results, and raises failures
+- `_get_s3_client()` lazily creates and reuses the S3 client
+- `_get_metadata_table()` lazily creates and reuses the DynamoDB table resource
+- `_isoformat()` normalizes timestamps
+- `_record_id()` creates deterministic identity
+- `_validate_event_version()` enforces the supported major version
+- `_head_object()` builds version-aware S3 requests
+- `_normalize_item()` creates the DynamoDB item
+- `_store_item()` performs the conditional write and handles duplicates
+- `process_record()` processes one S3 event record
+- `lambda_handler()` validates the batch, aggregates results, and raises failures
 
-## Lazy AWS SDK clients
+## AWS SDK client reuse
 
-The client and table resource are initialized outside the per-record path and cached in module globals.
+The S3 client and DynamoDB table resource are initialized outside the per-record path and cached in module globals.
 
-This allows a warm Lambda execution environment to reuse SDK objects rather than recreating them for every record. The code still treats the execution environment as disposable and does not rely on local state for correctness.
+A warm Lambda execution environment can reuse those SDK objects. Correctness does not depend on local state, so a new execution environment can process the same event safely.
 
 ## Event validation
 
@@ -65,7 +59,7 @@ The handler rejects:
 - malformed event versions
 - unsupported major event versions
 
-The current code accepts S3 event major version `2` and does not assume one exact minor version.
+The code accepts S3 event major version `2` and does not require one exact minor version.
 
 ## Object-key decoding
 
@@ -75,11 +69,11 @@ S3 notification keys are URL-encoded. The implementation uses:
 unquote_plus(object_data["key"])
 ```
 
-This converts both percent-encoded path characters and plus signs representing spaces.
+This converts percent-encoded path characters and plus signs representing spaces.
 
-## `HeadObject` behavior
+## `HeadObject`
 
-The event contains core information, but `HeadObject` supplies the current object headers used by the public data contract.
+The S3 event contains core object information, while `HeadObject` supplies the current object headers used by the public data contract.
 
 The request includes:
 
@@ -87,11 +81,11 @@ The request includes:
 - decoded key
 - version ID when present
 
-The implementation does not call `GetObject` and does not download the body.
+The function does not call `GetObject` and does not download the body.
 
 ## Normalized fields
 
-Required public fields include:
+Required fields include:
 
 - `RecordId`
 - `SchemaVersion`
@@ -109,7 +103,7 @@ Required public fields include:
 - `Sequencer`
 - `UserMetadata`
 
-Optional fields are stored only when available:
+Optional fields are stored when available:
 
 - `VersionId`
 - cache and content-disposition headers
@@ -129,10 +123,10 @@ version ID or empty value
 ETag or empty value
 ```
 
-The design separates:
+This distinguishes:
 
 - repeated delivery of the same event identity
-- a replacement upload creating a new object version
+- a replacement upload that creates a new object version
 - another object with the same filename under a different key or bucket
 
 ## Conditional persistence
@@ -143,23 +137,21 @@ The function writes with:
 ConditionExpression="attribute_not_exists(RecordId)"
 ```
 
-A `ConditionalCheckFailedException` means the identity is already stored. The function logs `duplicate` and treats the record as successfully handled.
-
-Other DynamoDB exceptions are raised.
+A `ConditionalCheckFailedException` means the identity is already stored. The function logs `duplicate` and treats the record as successfully handled. Other DynamoDB exceptions are raised.
 
 ## Batch behavior
 
-The Lambda handler iterates through every S3 record in the invocation.
+The Lambda handler processes every S3 record in the invocation.
 
 - successful records are stored immediately
-- failures are recorded with their record index and error text
+- failures are recorded with the record index and error text
 - when any record fails, the handler raises one aggregate runtime error
 
-This makes the failure visible to Lambda's asynchronous retry behavior. A retry can revisit records that already succeeded, which is why idempotent persistence is required.
+A retry can revisit records that already succeeded, which is why idempotent persistence is required.
 
 ## Structured logging
 
-Successful processing logs JSON containing:
+Successful and duplicate outcomes log JSON containing:
 
 - message
 - status
@@ -167,11 +159,9 @@ Successful processing logs JSON containing:
 - bucket
 - object key
 
-Duplicate handling also logs a structured record.
-
 The function does not log object contents or AWS credentials.
 
-## AWS SAM implementation
+## AWS SAM infrastructure
 
 `template.yaml` defines the deployed infrastructure.
 
@@ -202,7 +192,7 @@ The function does not log object contents or AWS credentials.
 
 - Python 3.12 ARM64
 - active tracing
-- environment variable for the table
+- table-name environment variable
 - generated S3 and DynamoDB policies
 - S3 event notification
 - retry and event-age configuration
@@ -217,25 +207,28 @@ The function does not log object contents or AWS credentials.
 - failure-queue depth alarm
 - optional SNS topic and email subscription
 
-## Public Pages implementation
+## Public project site
 
-The static site intentionally has no application runtime or AWS credentials.
+The static site has no application runtime and no AWS credentials.
 
 Public pages:
 
-- `index.html` — primary workflow and resume walkthrough
-- `writing.html` — canonical AWS article teasers and DEV editions
-- `proof.html` — implementation, repository, credential, and scope evidence
-- `sources.html` — official AWS service verification
-- `design-system.html` — visible tokens and component contracts
-- `404.html` — recovery routes
+- `index.html` explains the system, architecture, original internship work, public implementation, reliability, evidence, related writing, and scope
+- `writing.html` links to the original AWS and internship articles
+- `proof.html` links directly to the code, infrastructure, tests, and operating documents
+- `sources.html` connects implementation decisions to official AWS documentation
+- `404.html` provides recovery links
 
-Shared presentation:
+Shared interface:
 
 - `styles.css`
 - `hub.css`
-- first-party SVG architecture and editorial assets
-- social preview PNG
+- Open Sans typography
+- Cloudscape-inspired application layout, containers, controls, status indicators, and alerts
+- first-party SVG architecture and article artwork
+- social-preview PNG
+
+The design system is applied to the pages. There is no public page dedicated to explaining it. Implementation notes are maintained in [Cloudscape Interface Notes](design-system.md).
 
 Discovery and machine-readable files:
 
@@ -246,31 +239,29 @@ Discovery and machine-readable files:
 - `humans.txt`
 - `site.webmanifest`
 
-## Canonical writing implementation
+## Article metadata
 
-`data/aws-content.json` records the article and repository index used for governance.
+`data/aws-content.json` records the article and repository index used for consistency checks.
 
-Canonical personal article metadata comes from MDX frontmatter in the public blog source repository. The site links to the full articles rather than copying them.
-
-DEV links are treated as secondary distribution versions.
+Canonical personal article metadata comes from MDX frontmatter in the public blog repository. The project site links to the complete articles rather than copying them. DEV links are secondary distribution versions.
 
 ## Static-site validator
 
 `scripts/validate_site.py` uses the Python standard library to validate:
 
 - page structure
-- metadata and canonicals
+- metadata and canonical URLs
 - JSON-LD syntax
 - local links and fragments
 - image alternatives
 - SVG accessibility metadata
-- content-index dates and assets
+- article dates and assets
 - XML and manifest parsing
-- production support files
+- required production files
 
-It does not make external requests. Live availability is handled by a separate scheduled workflow.
+The validator does not make external requests. Live availability is checked by a scheduled workflow.
 
-## Why the public repository is an expansion
+## Original capstone and public expansion
 
 The original capstone architecture centered on:
 
@@ -278,7 +269,7 @@ The original capstone architecture centered on:
 S3 upload -> Lambda metadata extraction -> DynamoDB storage
 ```
 
-The public reconstruction adds the engineering work required to make that architecture independently inspectable:
+The public reconstruction adds:
 
 - infrastructure as code
 - deterministic identity
@@ -289,7 +280,7 @@ The public reconstruction adds the engineering work required to make that archit
 - unit tests and coverage
 - CI
 - deployment and recovery runbooks
-- official-source verification
-- production Pages and SEO surface
+- official AWS references
+- the static project site
 
-This expansion is clearly labeled. It does not imply that every public file existed in the exact same form during the internship.
+The public expansion is labeled separately and does not imply that every current repository file existed in the same form during the internship.
