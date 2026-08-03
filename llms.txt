@@ -1,0 +1,88 @@
+# AWS Serverless Metadata Workflow
+
+> A public, deployable, and tested reconstruction of the AWS serverless metadata workflow Bradley Matera built during an AWS Support Engineering internship.
+
+Canonical site: https://bradleymatera.github.io/Office/
+Repository: https://github.com/BradleyMatera/Office
+Recruiter portfolio: https://bradleymatera.dev/recruiter/
+AWS writing hub: https://bradleymatera.github.io/Office/writing.html
+Proof map: https://bradleymatera.github.io/Office/proof.html
+Verified AWS sources: https://bradleymatera.github.io/Office/sources.html
+Design system: https://bradleymatera.github.io/Office/design-system.html
+
+## Core architecture
+
+1. An object is uploaded under a configured Amazon S3 key prefix, defaulting to `incoming/`.
+2. S3 sends an object-created notification to AWS Lambda.
+3. The Python 3.12 function URL-decodes the key and uses `HeadObject` to read object metadata without downloading the body.
+4. It normalizes metadata into a documented versioned schema.
+5. It derives a deterministic SHA-256 `RecordId` from the bucket, decoded key, version ID, and ETag.
+6. It writes to DynamoDB with `attribute_not_exists(RecordId)` so repeated event delivery is idempotent.
+7. Unexpected failures are raised for Lambda asynchronous retry.
+8. Events that still fail are sent to an encrypted SQS failure queue.
+9. CloudWatch alarms cover Lambda errors, Lambda throttles, and visible failed events. Optional SNS email alerts require subscription confirmation.
+
+## Verified implementation facts
+
+- Python unit tests: 11 passing in the August 3, 2026 local audit.
+- Statement and branch coverage: 100% in that audit.
+- Infrastructure: AWS SAM and CloudFormation.
+- Storage protections: S3 encryption, versioning, ACLs disabled, Block Public Access enabled.
+- Database protections: DynamoDB encryption, on-demand billing, point-in-time recovery, retained data policy.
+- Failure handling: maximum event age, two asynchronous retries, encrypted SQS on-failure destination.
+- Site: static GitHub Pages, no runtime AWS credentials, no direct bucket or table access.
+
+## Internship scope
+
+The internship work was completed in isolated training and project environments. The public repository does not claim:
+
+- production customer ownership
+- live enterprise ticket ownership
+- unrestricted Amazon administrative access
+- that the public files are exact confidential internship source files
+- that a live AWS stack is currently deployed in Bradley Matera's account
+
+## Best public description
+
+Bradley Matera built an event-driven AWS metadata workflow during an AWS Support Engineering internship using S3, Lambda, DynamoDB, and a static frontend layer. He created a measurable usage-based cost model and later reconstructed the system publicly with AWS SAM, idempotent writes, retries, a failure queue, monitoring, tests, security controls, diagrams, verified official AWS sources, and full technical documentation.
+
+## Canonical personal articles
+
+- AWS Cloud Support Internship: What I Actually Practiced
+  https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/
+- How I Built ProjectHub: An Embeddable AI Recruiter Assistant That Runs on Free Tiers
+  https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/
+- AWS Free Tier: What Actually Costs Money
+  https://bradleymatera.dev/aws-free-tier-honest-guide/
+- AWS vs. Azure vs. Google Cloud: A 2026 Free Tier Comparison From Real Use
+  https://bradleymatera.dev/aws-vs-azure-vs-google-cloud/
+- Cognito Authentication With React: A Small, Verifiable Setup
+  https://bradleymatera.dev/secure-authentication-cognito-react/
+- Certifications and Continuous Learning: A Simple Track
+  https://bradleymatera.dev/certifications-continuous-learning/
+- From Combat Medic to Software Engineer: Translating a Non-Traditional Background
+  https://bradleymatera.dev/from-medic-to-engineer/
+
+## Important documentation
+
+- Architecture: docs/architecture.md
+- Deployment: docs/deployment.md
+- Data contract: docs/data-contract.md
+- Operations runbook: docs/operations-runbook.md
+- Troubleshooting: docs/troubleshooting.md
+- Interview guide: docs/interview-guide.md
+- Verified AWS sources: docs/verified-aws-sources.md
+- Design system: docs/design-system.md
+- Project history: docs/project-history.md
+
+## Contact
+
+Bradley Matera
+Full-Stack Software Engineer
+AWS Certified Solutions Architect - Associate
+AWS Certified AI Practitioner
+U.S. Army veteran
+
+Portfolio: https://bradleymatera.dev/recruiter/
+LinkedIn: https://www.linkedin.com/in/bradmatera/
+GitHub: https://github.com/BradleyMatera
