@@ -1,0 +1,47 @@
+name: Validate Serverless Metadata Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    env:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      TABLE_NAME: test-metadata-table
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade -r requirements-dev.txt
+
+      - name: Lint Python
+        run: ruff check src tests
+
+      - name: Run unit tests with coverage
+        run: pytest --cov=src/metadata_extractor --cov-report=term-missing --cov-fail-under=85
+
+      - name: Set up AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Validate SAM template
+        run: sam validate --lint
+
+      - name: Build SAM application
+        run: sam build
