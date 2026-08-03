@@ -4,29 +4,93 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AWS Serverless Metadata Workflow | Bradley Matera</title>
-  <meta name="description" content="A deployable, tested, and fully documented AWS serverless metadata workflow using Amazon S3, AWS Lambda, Amazon DynamoDB, SQS, CloudWatch, and AWS SAM." />
+  <meta name="description" content="Bradley Matera's AWS internship capstone walkthrough: a deployable and tested S3, Lambda, DynamoDB, SQS, CloudWatch, and AWS SAM metadata workflow with writing, proof, and verified AWS sources." />
   <meta name="author" content="Bradley Matera" />
   <meta name="theme-color" content="#071426" />
-  <meta property="og:title" content="AWS Serverless Metadata Workflow" />
-  <meta property="og:description" content="A real AWS internship capstone reconstructed as a deployable, tested, public engineering case study." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://bradleymatera.github.io/Office/" />
   <link rel="canonical" href="https://bradleymatera.github.io/Office/" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="alternate" type="application/rss+xml" title="Bradley Matera AWS Writing" href="rss.xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AWS Serverless Metadata Workflow | Bradley Matera" />
+  <meta property="og:description" content="A real AWS internship capstone reconstructed as a deployable, tested, documented, and officially verified public engineering case study." />
+  <meta property="og:url" content="https://bradleymatera.github.io/Office/" />
+  <meta property="og:image" content="https://bradleymatera.github.io/Office/assets/og/aws-metadata-workflow.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AWS Serverless Metadata Workflow: S3 event to Python Lambda to idempotent DynamoDB record." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AWS Serverless Metadata Workflow | Bradley Matera" />
+  <meta name="twitter:description" content="AWS internship capstone walkthrough with deployable code, tests, proof, writing, and verified AWS documentation." />
+  <meta name="twitter:image" content="https://bradleymatera.github.io/Office/assets/og/aws-metadata-workflow.png" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="hub.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareSourceCode",
-    "name": "AWS Serverless Metadata Workflow",
-    "description": "A deployable and tested event-driven AWS metadata workflow using Amazon S3, AWS Lambda, Amazon DynamoDB, SQS, CloudWatch, and AWS SAM.",
-    "codeRepository": "https://github.com/BradleyMatera/Office",
-    "url": "https://bradleymatera.github.io/Office/",
-    "programmingLanguage": ["Python", "YAML", "HTML", "CSS"],
-    "author": {
-      "@type": "Person",
-      "name": "Bradley Matera",
-      "url": "https://bradleymatera.dev/recruiter/"
-    }
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://bradleymatera.github.io/Office/#website",
+        "url": "https://bradleymatera.github.io/Office/",
+        "name": "AWS Serverless Metadata Workflow",
+        "description": "Bradley Matera's AWS internship capstone walkthrough, implementation, writing hub, proof map, and verified AWS source library.",
+        "author": {"@id": "https://bradleymatera.dev/recruiter/#bradley-matera"}
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "@id": "https://bradleymatera.github.io/Office/#software",
+        "name": "AWS Serverless Metadata Workflow",
+        "description": "A deployable and tested event-driven AWS metadata workflow using Amazon S3, AWS Lambda, Amazon DynamoDB, Amazon SQS, Amazon CloudWatch, and AWS SAM.",
+        "codeRepository": "https://github.com/BradleyMatera/Office",
+        "url": "https://bradleymatera.github.io/Office/",
+        "runtimePlatform": "AWS Lambda Python 3.12",
+        "programmingLanguage": ["Python", "YAML", "HTML", "CSS"],
+        "license": "https://github.com/BradleyMatera/Office/blob/main/LICENSE",
+        "author": {
+          "@type": "Person",
+          "@id": "https://bradleymatera.dev/recruiter/#bradley-matera",
+          "name": "Bradley Matera",
+          "url": "https://bradleymatera.dev/recruiter/",
+          "sameAs": [
+            "https://github.com/BradleyMatera",
+            "https://www.linkedin.com/in/bradmatera/",
+            "https://dev.to/bradleymatera"
+          ]
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://bradleymatera.github.io/Office/#faq-schema",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Did this AWS internship project run against production customer data?",
+            "acceptedAnswer": {"@type": "Answer", "text": "No. The internship work was completed in isolated training and project environments. The public reconstruction does not claim production customer ownership."}
+          },
+          {
+            "@type": "Question",
+            "name": "What does the Lambda function actually do?",
+            "acceptedAnswer": {"@type": "Answer", "text": "It validates S3 object-created events, URL-decodes the object key, calls HeadObject, normalizes object metadata, derives a deterministic record identity, and performs an idempotent conditional write to DynamoDB."}
+          },
+          {
+            "@type": "Question",
+            "name": "Does the workflow download the uploaded file?",
+            "acceptedAnswer": {"@type": "Answer", "text": "No. The current implementation reads object headers through HeadObject and does not download or parse the full object body."}
+          },
+          {
+            "@type": "Question",
+            "name": "How does the workflow handle duplicate S3 notifications?",
+            "acceptedAnswer": {"@type": "Answer", "text": "It derives a deterministic SHA-256 RecordId and uses attribute_not_exists in the DynamoDB condition expression. A repeated identity is logged as a successful duplicate rather than stored twice."}
+          },
+          {
+            "@type": "Question",
+            "name": "Is a live AWS stack exposed through this website?",
+            "acceptedAnswer": {"@type": "Answer", "text": "No. GitHub Pages hosts static documentation and source links. It contains no AWS credentials and provides no direct access to a bucket, Lambda function, queue, or DynamoDB table."}
+          }
+        ]
+      }
+    ]
   }
   </script>
 </head>
@@ -39,37 +103,37 @@
         <p class="eyebrow">AWS Support Engineering Internship Capstone</p>
         <h1>AWS Serverless<br />Metadata Workflow</h1>
         <p class="lead">
-          A real event-driven cloud project reconstructed as a deployable AWS SAM application with
-          production-style Python, idempotent data writes, retries, a failure queue, monitoring,
-          automated tests, architecture graphics, and complete operating documentation.
+          The permanent technical walkthrough behind my AWS internship resume bullet: a real event-driven cloud project
+          reconstructed as a deployable AWS SAM application with tested Python, idempotent writes, retries, an encrypted
+          failure queue, actionable monitoring, architecture graphics, official AWS verification, and complete operating documentation.
         </p>
         <div class="status-row" aria-label="Project status">
           <span class="status-pill">Deployable</span>
-          <span class="status-pill">Tested</span>
-          <span class="status-pill">Documented</span>
+          <span class="status-pill">11 tests</span>
+          <span class="status-pill">100% local branch coverage</span>
           <span class="status-pill">Public-safe</span>
         </div>
         <div class="hero-actions">
           <a class="button primary" href="https://github.com/BradleyMatera/Office">View source code</a>
-          <a class="button" href="#deploy">Deploy with AWS SAM</a>
-          <a class="button" href="docs/interview-guide.md">Interview guide</a>
+          <a class="button" href="https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/">Read the internship story</a>
+          <a class="button" href="proof.html">Check the proof</a>
         </div>
         <div class="callout">
           <strong>Scope:</strong> The original internship project was completed in isolated training and project environments.
-          This public repository reconstructs and expands the real architecture without exposing confidential Amazon material
-          or claiming production customer ownership.
+          This public repository reconstructs and expands the architecture without exposing confidential Amazon material,
+          claiming production customer ownership, or pretending a live AWS account is connected to this page.
         </div>
       </div>
 
       <aside class="hero-panel" aria-label="Project at a glance">
         <p class="panel-label">Project at a glance</p>
         <dl class="facts">
-          <div><dt>Trigger</dt><dd>S3 ObjectCreated</dd></div>
-          <div><dt>Compute</dt><dd>Python 3.12 Lambda</dd></div>
-          <div><dt>Database</dt><dd>DynamoDB on demand</dd></div>
-          <div><dt>Failures</dt><dd>Encrypted SQS queue</dd></div>
-          <div><dt>Infrastructure</dt><dd>AWS SAM / CloudFormation</dd></div>
-          <div><dt>Verification</dt><dd>Tests, lint, coverage, CI</dd></div>
+          <div><dt>Trigger</dt><dd>S3 ObjectCreated under a controlled prefix</dd></div>
+          <div><dt>Compute</dt><dd>Python 3.12 ARM64 Lambda</dd></div>
+          <div><dt>Database</dt><dd>DynamoDB on demand with PITR</dd></div>
+          <div><dt>Failures</dt><dd>Retries plus encrypted SQS destination</dd></div>
+          <div><dt>Operations</dt><dd>Logs, alarms, optional SNS email</dd></div>
+          <div><dt>Infrastructure</dt><dd>AWS SAM and CloudFormation</dd></div>
         </dl>
       </aside>
     </div>
@@ -80,40 +144,50 @@
       <a href="#overview">Overview</a>
       <a href="#architecture">Architecture</a>
       <a href="#implementation">Implementation</a>
-      <a href="#data">Data contract</a>
       <a href="#reliability">Reliability</a>
-      <a href="#security">Security</a>
+      <a href="#writing">Writing</a>
+      <a href="proof.html">Proof</a>
+      <a href="sources.html">AWS sources</a>
       <a href="#deploy">Deploy</a>
-      <a href="#history">History</a>
+      <a href="#faq">FAQ</a>
       <a href="#docs">Docs</a>
     </div>
   </nav>
+
+  <div class="trust-strip" aria-label="Verification summary">
+    <div class="container">
+      <div class="trust-item"><strong>Code verified locally</strong><span>11 tests passed with 100% statement and branch coverage</span></div>
+      <div class="trust-item"><strong>Platform behavior checked</strong><span>S3, Lambda, DynamoDB, SQS, CloudWatch, and SAM mapped to official AWS docs</span></div>
+      <div class="trust-item"><strong>Content source checked</strong><span>Canonical AWS article dates and slugs verified from public MDX frontmatter</span></div>
+      <div class="trust-item"><strong>Claim boundary checked</strong><span>Training and capstone work remain separate from production ownership claims</span></div>
+    </div>
+  </div>
 
   <main id="main-content">
     <section id="overview" class="section">
       <div class="container">
         <div class="section-heading">
           <p class="section-kicker">The problem</p>
-          <h2>Turn file uploads into structured metadata without running a server</h2>
+          <h2>Turn file uploads into structured metadata without operating a server</h2>
           <p>
-            The workflow reacts when a file arrives in Amazon S3, extracts current object-level metadata,
-            normalizes it into a documented schema, and stores an idempotent record in DynamoDB.
-            It is intentionally event-driven, low-operations, and measurable.
+            The workflow reacts when a file arrives under a configured Amazon S3 key prefix, reads current object-level metadata,
+            normalizes it into a documented schema, and stores an idempotent record in DynamoDB. It is event-driven,
+            low-operations, measurable, and intentionally limited to metadata rather than full file-content processing.
           </p>
         </div>
 
         <div class="metric-grid" aria-label="Project implementation metrics">
-          <div class="metric"><strong>6</strong><span>managed AWS resources</span></div>
-          <div class="metric"><strong>1</strong><span>event-driven Lambda path</span></div>
-          <div class="metric"><strong>5+</strong><span>unit-test scenarios</span></div>
-          <div class="metric"><strong>85%</strong><span>minimum CI coverage</span></div>
+          <div class="metric"><strong>8+</strong><span>managed AWS resources, depending on alert configuration</span></div>
+          <div class="metric"><strong>1</strong><span>focused event-driven processing path</span></div>
+          <div class="metric"><strong>11</strong><span>local unit and failure-path tests</span></div>
+          <div class="metric"><strong>100%</strong><span>statement and branch coverage in the August 3 audit</span></div>
         </div>
 
         <div class="grid three-up feature-grid">
           <article class="card">
             <p class="card-number">01</p>
             <h3>Upload</h3>
-            <p>An encrypted, versioned S3 bucket receives a file and publishes an object-created event.</p>
+            <p>An encrypted, versioned, ACL-free S3 bucket accepts an object under the configured intake prefix.</p>
           </article>
           <article class="card">
             <p class="card-number">02</p>
@@ -123,7 +197,7 @@
           <article class="card">
             <p class="card-number">03</p>
             <h3>Persist</h3>
-            <p>A deterministic record identity and conditional DynamoDB write make repeated event delivery safe.</p>
+            <p>A deterministic record identity and conditional DynamoDB write make repeated delivery safe.</p>
           </article>
         </div>
       </div>
@@ -133,10 +207,10 @@
       <div class="container">
         <div class="section-heading">
           <p class="section-kicker">System design</p>
-          <h2>Simple services with clear responsibilities</h2>
+          <h2>Simple services with narrow responsibilities</h2>
           <p>
             S3 owns file intake, Lambda owns short-lived processing, DynamoDB owns metadata persistence,
-            and the monitoring and failure path make asynchronous behavior observable and recoverable.
+            and the monitoring and failure path make asynchronous behavior visible and recoverable.
           </p>
         </div>
         <figure class="figure-card">
@@ -154,10 +228,10 @@
       <div class="container">
         <div class="section-heading">
           <p class="section-kicker">Real implementation</p>
-          <h2>This is deployable code, not only a diagram</h2>
+          <h2>Deployable code, not only a diagram</h2>
           <p>
             The repository includes AWS SAM infrastructure, a Python Lambda handler, unit tests,
-            a representative S3 event, repeatable developer commands, and GitHub Actions validation.
+            a representative S3 event, repeatable developer commands, GitHub Actions validation, and a dependency-free static-site release audit.
           </p>
         </div>
 
@@ -165,13 +239,13 @@
           <article class="card detail-card">
             <h3>Infrastructure controls</h3>
             <ul class="check-list">
-              <li>S3 encryption, versioning, and public-access blocking</li>
-              <li>DynamoDB on-demand mode, encryption, and point-in-time recovery</li>
+              <li>S3 encryption, versioning, bucket-owner-enforced ownership, and public-access blocking</li>
+              <li>Configurable S3 intake prefix, defaulting to <code>incoming/</code></li>
+              <li>DynamoDB on-demand mode, encryption, point-in-time recovery, and retained-data policy</li>
               <li>Python 3.12 ARM64 Lambda with X-Ray tracing</li>
               <li>Asynchronous retry and maximum event-age controls</li>
               <li>Encrypted SQS on-failure destination</li>
-              <li>Log retention and Lambda error alarm</li>
-              <li>Retained bucket and table during stack deletion</li>
+              <li>Error, throttle, and failure-queue alarms with optional SNS email</li>
             </ul>
           </article>
           <article class="card detail-card">
@@ -181,9 +255,9 @@
               <li>Rejects unsupported event sources</li>
               <li>Decodes S3 object keys correctly</li>
               <li>Uses version-aware <code>HeadObject</code> requests</li>
-              <li>Normalizes optional headers and checksums</li>
+              <li>Normalizes optional headers, user metadata, and checksums</li>
               <li>Uses deterministic SHA-256 record identity</li>
-              <li>Logs created and duplicate outcomes as JSON</li>
+              <li>Logs created and duplicate outcomes as structured JSON</li>
             </ul>
           </article>
         </div>
@@ -207,10 +281,11 @@
             <span>Continuous verification</span>
             <a href="https://github.com/BradleyMatera/Office/actions/workflows/validate.yml">View workflow</a>
           </div>
-          <pre><code>ruff check src tests
+          <pre><code>ruff check src tests scripts
 pytest --cov=src/metadata_extractor --cov-fail-under=85
 sam validate --lint
-sam build</code></pre>
+sam build
+python scripts/validate_site.py</code></pre>
         </div>
       </div>
     </section>
@@ -222,7 +297,7 @@ sam build</code></pre>
           <h2>Normalized, versioned, and explainable</h2>
           <p>
             Each item uses <code>RecordId</code> as the DynamoDB partition key. The ID is derived from the bucket,
-            decoded object key, version ID, and ETag so retries are safe while distinct object versions remain distinct.
+            decoded object key, version ID, and ETag so repeated delivery is safe while distinct object versions remain distinct.
           </p>
         </div>
 
@@ -271,31 +346,20 @@ sam build</code></pre>
       <div class="container">
         <div class="section-heading">
           <p class="section-kicker">Operational behavior</p>
-          <h2>Designed for retries, duplicates, and investigation</h2>
+          <h2>Designed for retries, duplicates, alarms, and investigation</h2>
         </div>
 
         <div class="timeline reliability-flow">
-          <article>
-            <span>1</span>
-            <div><h3>Process</h3><p>Lambda handles the S3 event and attempts the conditional metadata write.</p></div>
-          </article>
-          <article>
-            <span>2</span>
-            <div><h3>Retry</h3><p>Unexpected failures are raised so Lambda asynchronous retry behavior applies.</p></div>
-          </article>
-          <article>
-            <span>3</span>
-            <div><h3>Quarantine</h3><p>An event that still fails is delivered to the encrypted SQS failure queue.</p></div>
-          </article>
-          <article>
-            <span>4</span>
-            <div><h3>Recover</h3><p>The runbook requires root-cause correction, safe replay, verification, and only then message deletion.</p></div>
-          </article>
+          <article><span>1</span><div><h3>Process</h3><p>Lambda handles the S3 event and attempts the conditional metadata write.</p></div></article>
+          <article><span>2</span><div><h3>Retry</h3><p>Unexpected failures are raised so Lambda asynchronous retry behavior applies.</p></div></article>
+          <article><span>3</span><div><h3>Quarantine</h3><p>An event that still fails is delivered to the encrypted SQS failure queue.</p></div></article>
+          <article><span>4</span><div><h3>Alert</h3><p>CloudWatch monitors errors, throttles, and visible failed events. Optional SNS email requires confirmation.</p></div></article>
+          <article><span>5</span><div><h3>Recover</h3><p>The runbook requires root-cause correction, safe replay, verification, and only then message deletion.</p></div></article>
         </div>
 
         <div class="grid three-up">
           <article class="card"><h3>Duplicate delivery</h3><p>Returns a successful <code>duplicate</code> outcome rather than creating another item.</p></article>
-          <article class="card"><h3>Partial multi-record failure</h3><p>Successful records remain stored while the invocation reports the failed record indexes for retry.</p></article>
+          <article class="card"><h3>Partial multi-record failure</h3><p>Successful records remain stored while the invocation reports failed record indexes for retry.</p></article>
           <article class="card"><h3>Data deletion</h3><p>The S3 bucket and DynamoDB table are retained instead of being silently destroyed with the stack.</p></article>
         </div>
       </div>
@@ -307,7 +371,7 @@ sam build</code></pre>
           <p class="section-kicker">Security and public boundaries</p>
           <h2>The site is public. The AWS account is not.</h2>
           <p>
-            GitHub Pages contains documentation, sample events, and source code. It contains no AWS credentials,
+            GitHub Pages contains documentation, sample events, code, writing previews, and verified links. It contains no AWS credentials,
             no direct bucket or table access, no production customer data, and no confidential Amazon implementation material.
           </p>
         </div>
@@ -322,10 +386,10 @@ sam build</code></pre>
             <h3>Implemented protections</h3>
             <ul class="check-list">
               <li>Encryption at rest for S3, DynamoDB, and SQS</li>
-              <li>S3 public-access blocking</li>
-              <li>Least-privilege generated policies</li>
-              <li>No object-body logging</li>
-              <li>Documented warning against sensitive user metadata</li>
+              <li>All four S3 Block Public Access controls</li>
+              <li>ACLs disabled through bucket-owner-enforced ownership</li>
+              <li>Least-privilege generated policy templates</li>
+              <li>No object-body logging or public AWS credentials</li>
             </ul>
           </article>
           <article class="card warning">
@@ -335,7 +399,7 @@ sam build</code></pre>
               <li>No live enterprise ticket ownership</li>
               <li>No unrestricted Amazon administration</li>
               <li>No claim that public files are exact internal files</li>
-              <li>No confidential internship material</li>
+              <li>No claim that a live AWS stack is connected to this site</li>
             </ul>
           </article>
         </div>
@@ -348,14 +412,76 @@ sam build</code></pre>
           <p class="section-kicker">Cost reasoning</p>
           <h2>Measured by usage, not described with a fake universal price</h2>
           <p>
-            The workflow breaks cost into the inputs that actually change: storage, requests, function duration,
-            database operations, failure traffic, logs, retention, and transfer. Region and account usage still matter.
+            The workflow breaks cost into the inputs that actually change: storage, object versions, requests,
+            function duration, database operations, failure traffic, logs, alarms, recovery features, retention, and transfer.
           </p>
         </div>
         <figure class="figure-card">
           <img class="diagram" src="assets/cost-drivers.svg" alt="Diagram showing measurable cost drivers for Amazon S3, AWS Lambda, DynamoDB, SQS, CloudWatch, and the public static site." />
-          <figcaption>Cost drivers by managed service.</figcaption>
+          <figcaption>Cost drivers by managed service. Region and account usage still matter.</figcaption>
         </figure>
+        <p class="center-link"><a class="text-button" href="https://bradleymatera.dev/aws-free-tier-honest-guide/">Read AWS Free Tier: What Actually Costs Money</a></p>
+      </div>
+    </section>
+
+    <section id="writing" class="section alt">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">From my AWS writing</p>
+          <h2>The longer explanations behind the architecture and resume bullets</h2>
+          <p>
+            These previews point to the canonical articles on my personal site. This project does not duplicate the full posts;
+            it gives readers the right next article based on the question they are trying to answer.
+          </p>
+        </div>
+
+        <article class="article-feature">
+          <div class="article-feature__media"><img src="assets/content/internship-console.svg" alt="Technical illustration of the AWS internship troubleshooting workflow, including logs, a serverless function, and metadata records." /></div>
+          <div class="article-feature__body">
+            <div class="article-meta"><time datetime="2026-07-08">July 8, 2026</time><span>10 min read</span></div>
+            <h2>AWS Cloud Support Internship: What I Actually Practiced</h2>
+            <p>The training environment, daily troubleshooting loop, capstone workflow, service boundaries, and the work I do not claim to have owned.</p>
+            <div class="tag-row"><span class="tag">AWS</span><span class="tag">Troubleshooting</span><span class="tag">Cloud Support</span></div>
+            <div class="repo-links"><a href="https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/">Read the full article</a><a href="writing.html">Open all AWS writing</a></div>
+          </div>
+        </article>
+
+        <div class="article-grid" style="margin-top:24px">
+          <a class="article-card" href="https://bradleymatera.dev/aws-free-tier-honest-guide/">
+            <div class="article-card__media"><img src="assets/content/aws-cost-radar.svg" alt="AWS cost-control illustration with resource, threshold, cleanup, and retention signals." /></div>
+            <div class="article-card__body"><div class="article-meta"><time datetime="2026-07-08">July 8, 2026</time><span>8 min read</span></div><h3>AWS Free Tier: What Actually Costs Money</h3><p>A practical resource, alert, cleanup, and billing-verification checklist.</p><div class="article-card__footer"><span>Read on bradleymatera.dev</span><span aria-hidden="true">→</span></div></div>
+          </a>
+          <a class="article-card" href="https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/">
+            <div class="article-card__media"><img src="assets/content/projecthub-recruiter.svg" alt="Illustration of ProjectHub connecting recruiter questions to grounded knowledge and verified answers." /></div>
+            <div class="article-card__body"><div class="article-meta"><time datetime="2026-07-11">July 11, 2026</time><span>22 min read</span></div><h3>How I Built ProjectHub</h3><p>The assistant that grounds recruiter answers about this internship and the rest of my work.</p><div class="article-card__footer"><span>Read on bradleymatera.dev</span><span aria-hidden="true">→</span></div></div>
+          </a>
+          <a class="article-card" href="https://bradleymatera.dev/aws-vs-azure-vs-google-cloud/">
+            <div class="article-card__media"><img src="assets/content/cloud-comparison.svg" alt="Illustration comparing three abstract cloud platforms across compute, databases, billing risk, and operational fit." /></div>
+            <div class="article-card__body"><div class="article-meta"><time datetime="2026-07-08">July 8, 2026</time><span>12 min read</span></div><h3>AWS vs. Azure vs. Google Cloud</h3><p>A 2026 free-tier comparison based on running small projects across all three.</p><div class="article-card__footer"><span>Read on bradleymatera.dev</span><span aria-hidden="true">→</span></div></div>
+          </a>
+        </div>
+        <p class="center-link"><a class="text-button" href="writing.html">Browse all seven canonical articles and three DEV editions</a></p>
+      </div>
+    </section>
+
+    <section id="verification" class="section">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Proof and platform verification</p>
+          <h2>Move from the claim to the code, then to the AWS documentation</h2>
+        </div>
+        <div class="grid two-up">
+          <article class="card success">
+            <h3>Public proof map</h3>
+            <p>See which repositories, articles, certifications, tests, and live pages support each part of the internship story, along with what they do not prove.</p>
+            <div class="repo-links"><a href="proof.html">Open proof map</a><a href="https://github.com/BradleyMatera/Office">Open repository</a></div>
+          </article>
+          <article class="card">
+            <h3>Verified AWS sources</h3>
+            <p>Check duplicate-event behavior, <code>HeadObject</code>, Lambda retries, SQS destinations, conditional DynamoDB writes, S3 ownership, PITR, log retention, and alarm notifications against official AWS documentation.</p>
+            <div class="repo-links"><a href="sources.html">Open official-source map</a><a href="docs/verified-aws-sources.md">Open Markdown version</a></div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -368,96 +494,87 @@ sam build</code></pre>
         </div>
 
         <div class="deploy-grid">
-          <div class="code-panel">
-            <div class="code-title"><span>1. Validate locally</span></div>
-            <pre><code>make install
+          <div class="code-panel"><div class="code-title"><span>1. Validate locally</span></div><pre><code>make install
 make lint
 make test
 make validate
-make build</code></pre>
-          </div>
-          <div class="code-panel">
-            <div class="code-title"><span>2. Deploy</span></div>
-            <pre><code>sam deploy --guided \
+make build
+python scripts/validate_site.py</code></pre></div>
+          <div class="code-panel"><div class="code-title"><span>2. Deploy</span></div><pre><code>sam deploy --guided \
   --stack-name aws-serverless-metadata-workflow \
-  --region us-east-1</code></pre>
-          </div>
-          <div class="code-panel">
-            <div class="code-title"><span>3. Upload a test object</span></div>
-            <pre><code>aws s3 cp sample.txt \
+  --region us-east-1</code></pre></div>
+          <div class="code-panel"><div class="code-title"><span>3. Upload under the prefix</span></div><pre><code>aws s3 cp sample.txt \
   s3://YOUR_UPLOAD_BUCKET/incoming/sample.txt \
   --content-type text/plain \
-  --metadata source=pages-demo</code></pre>
-          </div>
-          <div class="code-panel">
-            <div class="code-title"><span>4. Verify</span></div>
-            <pre><code>aws logs tail /aws/lambda/YOUR_FUNCTION_NAME \
+  --metadata source=pages-demo</code></pre></div>
+          <div class="code-panel"><div class="code-title"><span>4. Verify</span></div><pre><code>aws logs tail /aws/lambda/YOUR_FUNCTION_NAME \
   --since 10m --follow
 
 aws dynamodb scan \
   --table-name YOUR_METADATA_TABLE \
-  --max-items 10</code></pre>
-          </div>
+  --max-items 10</code></pre></div>
         </div>
 
-        <div class="notice">
-          <strong>Cleanup warning:</strong> The upload bucket and metadata table use retention policies.
-          Deleting the CloudFormation stack does not automatically destroy their data.
-        </div>
-        <p class="center-link"><a class="text-button" href="docs/deployment.md">Read the full deployment guide</a></p>
+        <div class="notice"><strong>Cleanup warning:</strong> The upload bucket and metadata table use retention policies. Deleting the CloudFormation stack does not automatically destroy their data.</div>
+        <p class="center-link"><a class="text-button" href="docs/deployment.md">Read the full deployment and alarm-confirmation guide</a></p>
       </div>
     </section>
 
     <section id="history" class="section">
       <div class="container">
-        <div class="section-heading">
-          <p class="section-kicker">Project history</p>
-          <h2>From an early metadata-table idea to a complete public system</h2>
-        </div>
+        <div class="section-heading"><p class="section-kicker">Project history</p><h2>From an early metadata-table idea to a complete public system</h2></div>
         <div class="timeline history-timeline">
-          <article>
-            <span>2025</span>
-            <div><h3>February: technical precursor</h3><p>Early work connected S3 object information with a DynamoDB metadata table and considered Lambda automation.</p></div>
-          </article>
-          <article>
-            <span>2025</span>
-            <div><h3>May–August: AWS internship</h3><p>The project became a serverless metadata workflow using S3, Lambda, DynamoDB, a static frontend layer, and cloud cost reasoning.</p></div>
-          </article>
-          <article>
-            <span>2025</span>
-            <div><h3>July: completed capstone discussion</h3><p>The documented flow was S3 upload to Lambda metadata extraction to DynamoDB storage, with monitoring, security, testing, and presentation.</p></div>
-          </article>
-          <article>
-            <span>2026</span>
-            <div><h3>August: public reconstruction</h3><p>The project gained deployable SAM infrastructure, tested code, failure handling, diagrams, operations docs, CI, and this GitHub Pages site.</p></div>
-          </article>
+          <article><span>2025</span><div><h3>February: technical precursor</h3><p>Early work connected S3 object information with a DynamoDB metadata table and considered Lambda automation.</p></div></article>
+          <article><span>2025</span><div><h3>May–August: AWS internship</h3><p>The project became a serverless metadata workflow using S3, Lambda, DynamoDB, a static frontend layer, and cloud cost reasoning.</p></div></article>
+          <article><span>2025</span><div><h3>July: completed capstone discussion</h3><p>The documented flow was S3 upload to Lambda extraction to DynamoDB storage, with monitoring, security, testing, and presentation.</p></div></article>
+          <article><span>2026</span><div><h3>August: public reconstruction and production audit</h3><p>The project gained deployable infrastructure, tested code, failure handling, alarms, writing, proof, official sources, SEO files, a design system, and GitHub Pages release checks.</p></div></article>
         </div>
         <p class="center-link"><a class="text-button" href="docs/project-history.md">Read the full documented history</a></p>
       </div>
     </section>
 
-    <section id="docs" class="section alt">
+    <section id="faq" class="section alt">
       <div class="container">
         <div class="section-heading">
-          <p class="section-kicker">Documentation library</p>
-          <h2>Build, operate, explain, and defend the design</h2>
+          <p class="section-kicker">Recruiter and technical FAQ</p>
+          <h2>Direct answers to the questions this resume link is expected to raise</h2>
         </div>
+        <div class="faq-list">
+          <details><summary>Did this project run against production customer data?</summary><p>No. The internship work was completed in isolated training and project environments. This public reconstruction does not claim production customer ownership or access.</p></details>
+          <details><summary>Is this the exact internal Amazon repository?</summary><p>No. It is a public reconstruction and expansion based on the real architecture and work completed during the internship. Confidential and internal-only material is intentionally excluded.</p></details>
+          <details><summary>What does the Lambda function actually do?</summary><p>It validates the S3 event, decodes the object key, calls <code>HeadObject</code>, normalizes object metadata, derives a deterministic identity, and performs a conditional DynamoDB write.</p></details>
+          <details><summary>Does it download or parse the complete file?</summary><p>No. The current implementation reads object headers and does not download the full object body. File-content parsing would be a separate requirement and architecture decision.</p></details>
+          <details><summary>How are duplicate S3 notifications handled?</summary><p>The function uses a deterministic SHA-256 <code>RecordId</code> and <code>attribute_not_exists(RecordId)</code>. A repeated identity is logged as <code>duplicate</code> and treated as a successful idempotent outcome.</p></details>
+          <details><summary>What happens when processing repeatedly fails?</summary><p>Lambda applies the configured asynchronous retries and event-age limit. An event that still fails is sent to an encrypted SQS destination, and the queue-depth alarm can notify a confirmed SNS email subscriber.</p></details>
+          <details><summary>Is a live AWS account exposed through this page?</summary><p>No. GitHub Pages serves static files. The site contains no AWS credentials and provides no direct access to S3, Lambda, DynamoDB, SQS, CloudWatch, or an AWS account.</p></details>
+          <details><summary>What should an interviewer open next?</summary><p>Start with the internship article for context, the proof page for evidence, the source repository for implementation, and the verified-source page for current AWS service behavior.</p></details>
+        </div>
+        <p class="center-link"><a class="text-button" href="docs/faq.md">Open the complete FAQ document</a></p>
+      </div>
+    </section>
+
+    <section id="docs" class="section">
+      <div class="container">
+        <div class="section-heading"><p class="section-kicker">Documentation library</p><h2>Build, operate, explain, verify, and defend the design</h2></div>
         <div class="grid three-up docs-grid">
           <a class="doclink" href="docs/architecture.md"><span>Architecture</span><p>Service responsibilities and event flow.</p></a>
           <a class="doclink" href="docs/architecture-decisions/001-event-driven-serverless.md"><span>ADR 001</span><p>Why the system is event-driven and serverless.</p></a>
           <a class="doclink" href="docs/implementation-notes.md"><span>Implementation</span><p>Core logic and public reconstruction decisions.</p></a>
-          <a class="doclink" href="docs/deployment.md"><span>Deployment</span><p>Validation, launch, verification, updates, and cleanup.</p></a>
+          <a class="doclink" href="docs/deployment.md"><span>Deployment</span><p>Validation, parameters, alerts, launch, verification, updates, and cleanup.</p></a>
           <a class="doclink" href="docs/data-contract.md"><span>Data contract</span><p>Required fields, optional fields, identity, and privacy.</p></a>
           <a class="doclink" href="docs/operations-runbook.md"><span>Operations</span><p>Incidents, failed events, replay, monitoring, and changes.</p></a>
           <a class="doclink" href="docs/troubleshooting.md"><span>Troubleshooting</span><p>Pages, SAM, permissions, events, duplicates, and cleanup.</p></a>
           <a class="doclink" href="docs/security-and-scope.md"><span>Security and scope</span><p>Public-safe boundaries and truthful project claims.</p></a>
           <a class="doclink" href="docs/cost-model.md"><span>Cost model</span><p>Measurable usage drivers and architecture consequences.</p></a>
-          <a class="doclink" href="docs/testing-and-validation.md"><span>Testing</span><p>Workflow checks and public portfolio validation.</p></a>
+          <a class="doclink" href="docs/testing-and-validation.md"><span>Testing</span><p>Workflow, coverage, CI, and site-release validation.</p></a>
+          <a class="doclink" href="docs/verified-aws-sources.md"><span>Verified AWS sources</span><p>Claim-by-claim mapping to current official documentation.</p></a>
+          <a class="doclink" href="docs/design-system.md"><span>Design system</span><p>Tokens, components, accessibility, SEO, illustration, and content governance.</p></a>
           <a class="doclink" href="docs/accessibility.md"><span>Accessibility</span><p>Semantic structure, diagrams, keyboard access, and clarity.</p></a>
+          <a class="doclink" href="docs/project-history.md"><span>Project history</span><p>The recovered precursor, internship capstone, and public reconstruction.</p></a>
           <a class="doclink" href="docs/interview-guide.md"><span>Interview guide</span><p>Thirty-second, two-minute, and technical explanations.</p></a>
-          <a class="doclink" href="docs/faq.md"><span>FAQ</span><p>Production scope, metadata, deployment, failures, and history.</p></a>
           <a class="doclink" href="SECURITY.md"><span>Security policy</span><p>Responsible reporting and deployment responsibilities.</p></a>
           <a class="doclink" href="CONTRIBUTING.md"><span>Contributing</span><p>Quality, testing, claim, and security requirements.</p></a>
+          <a class="doclink" href="design-system.html"><span>Visual design system</span><p>See the tokens and components rendered in the browser.</p></a>
         </div>
       </div>
     </section>
@@ -467,12 +584,13 @@ aws dynamodb scan \
         <p class="section-kicker">The honest version</p>
         <h2>Real architecture. Real code. Clear boundaries.</h2>
         <p>
-          This project demonstrates cloud architecture, event-driven processing, operational thinking,
-          cost awareness, testing, documentation, and the discipline to separate verified work from exaggerated claims.
+          This project demonstrates cloud architecture, event-driven processing, operational thinking, cost awareness,
+          testing, documentation, official-source verification, and the discipline to separate verified work from exaggerated claims.
         </p>
         <div class="hero-actions closing-actions">
           <a class="button primary" href="https://github.com/BradleyMatera/Office">Explore the repository</a>
-          <a class="button" href="https://bradleymatera.dev/recruiter/">View Bradley's recruiter portfolio</a>
+          <a class="button" href="writing.html">Read my AWS writing</a>
+          <a class="button" href="https://bradleymatera.dev/recruiter/">View recruiter portfolio</a>
         </div>
       </div>
     </section>
@@ -482,13 +600,15 @@ aws dynamodb scan \
     <div class="container">
       <p><strong>Bradley Matera</strong> · Full-Stack Software Engineer · AWS Certified Solutions Architect - Associate · AWS Certified AI Practitioner · U.S. Army veteran</p>
       <p>
-        <a href="https://bradleymatera.dev/recruiter/">Recruiter Portfolio</a>
-        <span>·</span>
-        <a href="https://github.com/BradleyMatera/Office">GitHub Repository</a>
-        <span>·</span>
+        <a href="writing.html">AWS writing</a><span>·</span>
+        <a href="proof.html">Proof</a><span>·</span>
+        <a href="sources.html">Verified sources</a><span>·</span>
+        <a href="design-system.html">Design system</a><span>·</span>
+        <a href="rss.xml">RSS</a><span>·</span>
+        <a href="https://bradleymatera.dev/recruiter/">Recruiter portfolio</a><span>·</span>
         <a href="https://www.linkedin.com/in/bradmatera/">LinkedIn</a>
       </p>
-      <p class="footer-note">Public reconstruction of a 2025 AWS internship capstone. MIT licensed.</p>
+      <p class="footer-note">Public reconstruction of a 2025 AWS internship capstone. Major production audit completed August 3, 2026. MIT licensed.</p>
     </div>
   </footer>
 </body>
