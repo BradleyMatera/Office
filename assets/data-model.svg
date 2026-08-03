@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Simplified DynamoDB Data Model</title>
+  <desc id="desc">A diagram showing a simplified metadata record schema with partition key, file name, object key, content type, size, created time, last modified time, and source bucket.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 18px Arial, sans-serif; fill: #475569; }
+      .table { fill: white; stroke: #cbd5e1; stroke-width: 2; rx: 22; }
+      .head { fill: #dbeafe; }
+      .headText { font: 700 24px Arial, sans-serif; fill: #1e3a8a; }
+      .colHead { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .cell { font: 400 17px Arial, sans-serif; fill: #334155; }
+      .line { stroke: #e2e8f0; stroke-width: 1.5; }
+      .note { font: 400 17px Arial, sans-serif; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="760" />
+  <text class="title" x="60" y="68">Simplified Metadata Record Model</text>
+  <text class="subtitle" x="60" y="98">Public-safe example of the kind of normalized item stored in DynamoDB</text>
+
+  <rect class="table" x="120" y="150" width="960" height="520" rx="22" />
+  <rect class="head" x="120" y="150" width="960" height="80" rx="22" />
+  <text class="headText" x="390" y="198">DynamoDB Table: FileMetadata</text>
+
+  <line class="line" x1="420" y1="230" x2="420" y2="670" />
+  <text class="colHead" x="180" y="272">Attribute</text>
+  <text class="colHead" x="500" y="272">Description</text>
+
+  <line class="line" x1="120" y1="292" x2="1080" y2="292" />
+  <line class="line" x1="120" y1="352" x2="1080" y2="352" />
+  <line class="line" x1="120" y1="412" x2="1080" y2="412" />
+  <line class="line" x1="120" y1="472" x2="1080" y2="472" />
+  <line class="line" x1="120" y1="532" x2="1080" y2="532" />
+  <line class="line" x1="120" y1="592" x2="1080" y2="592" />
+
+  <text class="cell" x="180" y="330">fileId (partition key)</text>
+  <text class="cell" x="500" y="330">Unique identifier for the metadata item</text>
+
+  <text class="cell" x="180" y="390">fileName</text>
+  <text class="cell" x="500" y="390">Human-readable file name</text>
+
+  <text class="cell" x="180" y="450">objectKey</text>
+  <text class="cell" x="500" y="450">S3 object key used for retrieval and traceability</text>
+
+  <text class="cell" x="180" y="510">contentType</text>
+  <text class="cell" x="500" y="510">Detected or assigned MIME type</text>
+
+  <text class="cell" x="180" y="570">sizeBytes</text>
+  <text class="cell" x="500" y="570">Object size in bytes</text>
+
+  <text class="cell" x="180" y="630">lastModified / uploadedAt</text>
+  <text class="cell" x="500" y="630">Relevant object timestamps captured by the workflow</text>
+
+  <text class="note" x="120" y="716">Note: this is a simplified public example, not a disclosure of internal-only data structures.</text>
+</svg>
