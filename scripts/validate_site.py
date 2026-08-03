@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the static AWS portfolio site without third-party dependencies."""
+"""Validate the static AWS project site with Python's standard library."""
 
 from __future__ import annotations
 
@@ -16,13 +16,7 @@ from xml.etree import ElementTree
 ROOT = Path(__file__).resolve().parents[1]
 BASE_URL = "https://bradleymatera.github.io/Office/"
 AUDIT_DATE = date(2026, 8, 3)
-PUBLIC_PAGES = (
-    "index.html",
-    "writing.html",
-    "proof.html",
-    "sources.html",
-    "design-system.html",
-)
+PUBLIC_PAGES = ("index.html", "writing.html", "proof.html", "sources.html")
 ALL_PAGES = (*PUBLIC_PAGES, "404.html")
 
 
@@ -67,8 +61,7 @@ class SiteHTMLParser(HTMLParser):
         elif tag == "main":
             self.report.main_count += 1
 
-        element_id = values.get("id")
-        if element_id:
+        if element_id := values.get("id"):
             self.report.ids.append(element_id)
 
         if tag == "meta":
@@ -79,8 +72,7 @@ class SiteHTMLParser(HTMLParser):
             self._handle_anchor(values)
 
         if tag in {"img", "script", "source"}:
-            src = values.get("src", "").strip()
-            if src:
+            if src := values.get("src", "").strip():
                 self._record_reference("src", src)
         if tag == "img":
             self.report.images.append(values)
@@ -96,8 +88,7 @@ class SiteHTMLParser(HTMLParser):
             self.report.headings_one.append(normalize_text(self.h1_parts))
             self.capture_h1 = False
         elif tag == "script" and self.capture_json_ld:
-            block = "".join(self.json_ld_parts).strip()
-            if block:
+            if block := "".join(self.json_ld_parts).strip():
                 self.report.json_ld_blocks.append(block)
             self.capture_json_ld = False
 
@@ -167,10 +158,42 @@ def resolve_local_reference(page: Path, reference: str) -> tuple[Path, str]:
     return target.resolve(), parsed.fragment
 
 
+def validate_local_references(report: PageReport) -> list[str]:
+    errors: list[str] = []
+    relative = report.path.relative_to(ROOT)
+    ids = set(report.ids)
+    for attribute, reference in report.local_refs:
+        target, fragment = resolve_local_reference(report.path, reference)
+        if reference.startswith("#"):
+            if fragment not in ids:
+                errors.append(f"{relative}: missing local fragment target {reference}")
+            continue
+        try:
+            target.relative_to(ROOT)
+        except ValueError:
+            errors.append(f"{relative}: {attribute} escapes repository root: {reference}")
+            continue
+        if not target.exists():
+            errors.append(f"{relative}: missing local {attribute} target: {reference}")
+    return errors
+
+
+def validate_og_images(report: PageReport) -> list[str]:
+    errors: list[str] = []
+    relative = report.path.relative_to(ROOT)
+    for image_url in report.og_images:
+        parsed = urlparse(image_url)
+        if parsed.netloc != "bradleymatera.github.io" or not parsed.path.startswith("/Office/"):
+            continue
+        local_path = ROOT / parsed.path.removeprefix("/Office/")
+        if not local_path.exists():
+            errors.append(f"{relative}: missing local Open Graph image: {local_path.relative_to(ROOT)}")
+    return errors
+
+
 def validate_page(report: PageReport, *, require_canonical: bool) -> list[str]:
     errors: list[str] = []
     relative = report.path.relative_to(ROOT)
-
     if report.lang != "en":
         errors.append(f"{relative}: html lang must be 'en'")
     if not report.title:
@@ -206,42 +229,8 @@ def validate_page(report: PageReport, *, require_canonical: bool) -> list[str]:
 
     errors.extend(validate_local_references(report))
     errors.extend(validate_og_images(report))
-
     if require_canonical and report.canonicals and not report.canonicals[0].startswith(BASE_URL):
         errors.append(f"{relative}: canonical must start with {BASE_URL}")
-    return errors
-
-
-def validate_local_references(report: PageReport) -> list[str]:
-    errors: list[str] = []
-    relative = report.path.relative_to(ROOT)
-    ids = set(report.ids)
-    for attribute, reference in report.local_refs:
-        target, fragment = resolve_local_reference(report.path, reference)
-        if reference.startswith("#"):
-            if fragment not in ids:
-                errors.append(f"{relative}: missing local fragment target {reference}")
-            continue
-        try:
-            target.relative_to(ROOT)
-        except ValueError:
-            errors.append(f"{relative}: {attribute} escapes repository root: {reference}")
-            continue
-        if not target.exists():
-            errors.append(f"{relative}: missing local {attribute} target: {reference}")
-    return errors
-
-
-def validate_og_images(report: PageReport) -> list[str]:
-    errors: list[str] = []
-    relative = report.path.relative_to(ROOT)
-    for image_url in report.og_images:
-        parsed = urlparse(image_url)
-        if parsed.netloc != "bradleymatera.github.io" or not parsed.path.startswith("/Office/"):
-            continue
-        local_path = ROOT / parsed.path.removeprefix("/Office/")
-        if not local_path.exists():
-            errors.append(f"{relative}: missing local Open Graph image: {local_path.relative_to(ROOT)}")
     return errors
 
 
@@ -268,7 +257,6 @@ def validate_content_index() -> list[str]:
         if not article_url or article_url in article_urls:
             errors.append(f"data/aws-content.json: missing or duplicate article URL {article_url!r}")
         article_urls.add(article_url)
-
         try:
             published = date.fromisoformat(article["date"])
         except (KeyError, TypeError, ValueError):
@@ -276,7 +264,6 @@ def validate_content_index() -> list[str]:
             continue
         if published > AUDIT_DATE:
             errors.append(f"data/aws-content.json: future-dated article {article_id!r}: {published}")
-
         image = article.get("image")
         if not image or not (ROOT / image).exists():
             errors.append(f"data/aws-content.json: missing article image for {article_id!r}: {image!r}")
@@ -327,13 +314,13 @@ def validate_svg_accessibility() -> list[str]:
     errors: list[str] = []
     svg_paths = list((ROOT / "assets").glob("*.svg"))
     svg_paths.extend((ROOT / "assets/content").glob("*.svg"))
+    namespace = "{http://www.w3.org/2000/svg}"
     for path in svg_paths:
         try:
             root = ElementTree.parse(path).getroot()
         except ElementTree.ParseError as exc:
             errors.append(f"{path.relative_to(ROOT)}: invalid SVG XML: {exc}")
             continue
-        namespace = "{http://www.w3.org/2000/svg}"
         if root.find(f"{namespace}title") is None:
             errors.append(f"{path.relative_to(ROOT)}: missing SVG title")
         if root.find(f"{namespace}desc") is None:
@@ -367,8 +354,7 @@ def main() -> int:
 
     errors.extend(duplicate_value_errors(reports, "headings_one", "h1"))
     errors.extend(duplicate_value_errors(reports, "canonicals", "canonical URL"))
-    title_counter = Counter(report.title for report in reports if report.title)
-    for title, count in title_counter.items():
+    for title, count in Counter(report.title for report in reports if report.title).items():
         if count > 1:
             errors.append(f"duplicate page title {title!r}")
 
