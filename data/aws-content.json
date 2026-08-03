@@ -10,7 +10,7 @@
       "url": "https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/",
       "image": "assets/content/internship-console.svg",
       "tags": ["AWS", "Troubleshooting", "Cloud Support"],
-      "description": "A bounded walkthrough of the training environment, daily troubleshooting loop, capstone workflow, and the work I did not claim to own.",
+      "description": "The AWS training environment, daily troubleshooting process, serverless capstone, and the production responsibilities outside the internship scope.",
       "featured": true
     },
     {
@@ -21,7 +21,7 @@
       "url": "https://bradleymatera.dev/aws-free-tier-honest-guide/",
       "image": "assets/content/aws-cost-radar.svg",
       "tags": ["AWS", "Costs", "Free Tier"],
-      "description": "A practical checklist for checking active resources, setting cost alerts, and avoiding the assumption that unused-looking cloud accounts are free."
+      "description": "A practical checklist for checking active resources, setting cost alerts, and verifying that an AWS account is actually idle."
     },
     {
       "id": "cloud-comparison",
@@ -31,7 +31,7 @@
       "url": "https://bradleymatera.dev/aws-vs-azure-vs-google-cloud/",
       "image": "assets/content/cloud-comparison.svg",
       "tags": ["Cloud", "Free Tier", "Comparison"],
-      "description": "A real-use comparison of the three major cloud free tiers, including compute, databases, operational friction, and surprise-billing risks."
+      "description": "A comparison of the major cloud free tiers covering compute, databases, deployment friction, and billing risk from running small projects."
     },
     {
       "id": "projecthub",
@@ -41,7 +41,7 @@
       "url": "https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/",
       "image": "assets/content/projecthub-recruiter.svg",
       "tags": ["Cloud", "AI", "Architecture"],
-      "description": "The architecture behind Scout, including grounded AWS internship answers, free-provider failover, a GCP VM, safety checks, analytics, and graceful degradation."
+      "description": "The ProjectHub architecture, including a grounded knowledge base, provider failover, a GCP VM, safety checks, analytics, and graceful degradation."
     },
     {
       "id": "cognito-react",
@@ -51,7 +51,7 @@
       "url": "https://bradleymatera.dev/secure-authentication-cognito-react/",
       "image": "assets/content/cognito-auth-flow.svg",
       "tags": ["AWS", "Cognito", "React"],
-      "description": "A minimal authentication setup that exposes the user-pool, app-client, Amplify configuration, sign-in, and JWT verification flow instead of hiding it behind prebuilt UI."
+      "description": "A small authentication setup showing the user pool, app client, Amplify configuration, sign-in, and JWT verification flow."
     },
     {
       "id": "certification-track",
@@ -61,7 +61,7 @@
       "url": "https://bradleymatera.dev/certifications-continuous-learning/",
       "image": "assets/content/certification-roadmap.svg",
       "tags": ["AWS Certifications", "Learning", "Career"],
-      "description": "How I used certification study to connect cloud theory to consoles, permissions, logs, architecture choices, and repeatable troubleshooting habits."
+      "description": "How certification study connected cloud theory to consoles, permissions, logs, architecture choices, and repeatable troubleshooting habits."
     },
     {
       "id": "medic-engineer",
@@ -71,7 +71,7 @@
       "url": "https://bradleymatera.dev/from-medic-to-engineer/",
       "image": "assets/content/medic-engineer-bridge.svg",
       "tags": ["Career", "Operations", "AWS Internship"],
-      "description": "How assessment, stabilization, handoff, documentation, and proof translated from field work into engineering behavior and AWS internship evidence."
+      "description": "How assessment, stabilization, handoff, documentation, and escalation translated from field work into engineering behavior."
     }
   ],
   "devArticles": [
@@ -79,19 +79,19 @@
       "title": "How I Built ProjectHub: An Embeddable AI Recruiter Assistant That Runs on Free Tiers",
       "date": "2026-07-12",
       "url": "https://dev.to/bradleymatera/how-i-built-projecthub-an-embeddable-ai-recruiter-assistant-that-runs-on-free-tiers-bif",
-      "description": "The DEV edition of the ProjectHub architecture walkthrough."
+      "description": "The DEV edition of the ProjectHub architecture article."
     },
     {
       "title": "AWS vs. Azure vs. Google Cloud: The Ultimate Free Tier Battle & Survival Guide",
       "date": "2026-01-29",
       "url": "https://dev.to/bradleymatera/aws-vs-azure-vs-google-cloud-the-ultimate-free-tier-battle-survival-guide-2fam",
-      "description": "A DEV-focused free-tier comparison and cloud billing survival guide."
+      "description": "A DEV edition of the cloud free-tier comparison and billing guide."
     },
     {
       "title": "How to Launch AWS Stacks for Free — And What Happens When the Free Tier Ends",
       "date": "2025-11-14",
       "url": "https://dev.to/bradleymatera/how-to-launch-aws-stacks-for-free-and-what-happens-when-the-free-tier-ends-41of",
-      "description": "An earlier practical guide to small AWS stacks, cleanup, budgets, and post-free-tier costs."
+      "description": "A practical guide to small AWS stacks, cleanup, budgets, and costs after free-tier allowances end."
     }
   ],
   "repositories": [
@@ -99,22 +99,22 @@
       "name": "AWS Serverless Metadata Workflow",
       "url": "https://github.com/BradleyMatera/Office",
       "live": "https://bradleymatera.github.io/Office/",
-      "role": "Primary AWS proof",
-      "description": "Deployable AWS SAM infrastructure, Python Lambda, DynamoDB data contract, failure handling, tests, CI, diagrams, and runbooks."
+      "role": "Primary AWS implementation",
+      "description": "AWS SAM infrastructure, a Python Lambda function, DynamoDB data contract, retries, failure handling, tests, CI, diagrams, and operating documentation."
     },
     {
       "name": "ProjectHub / Scout",
       "url": "https://github.com/BradleyMatera/ProjectHub",
       "live": "https://bradleymatera.github.io/ProjectHub/",
-      "role": "Recruiter-facing supporting proof",
-      "description": "An embeddable assistant that answers AWS internship and project questions from a grounded, versioned knowledge base."
+      "role": "Related cloud and AI project",
+      "description": "An embeddable assistant that answers project and internship questions from a grounded, versioned knowledge base."
     },
     {
       "name": "Bradley Matera Blog",
       "url": "https://github.com/BradleyMatera/gatsby-starter-minimal-blog",
       "live": "https://bradleymatera.dev/blog/?q=aws",
-      "role": "Writing and source proof",
-      "description": "The MDX source for the AWS internship, free-tier, Cognito, certification, cloud-comparison, and career articles linked from this site."
+      "role": "Article source repository",
+      "description": "The MDX source for the AWS internship, free-tier, Cognito, certification, cloud-comparison, and career articles linked from the project site."
     }
   ]
 }
