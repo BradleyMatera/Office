@@ -29,7 +29,6 @@ jobs:
             "/writing.html"
             "/proof.html"
             "/sources.html"
-            "/design-system.html"
             "/styles.css"
             "/hub.css"
             "/assets/og/aws-metadata-workflow.png"
@@ -59,11 +58,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/" | grep -F "AWS Serverless Metadata Workflow"
-          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/writing.html" | grep -F "AWS writing built around real work"
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/" | grep -F "When a file is uploaded to Amazon S3"
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/writing.html" | grep -F "AWS articles and internship notes"
           curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/proof.html" | grep -F "What can be opened, checked"
           curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/sources.html" | grep -F "The architecture checked against AWS"
-          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/design-system.html" | grep -F "technical portfolio system"
 
       - name: Verify social image content type
         shell: bash
