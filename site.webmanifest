@@ -1,0 +1,18 @@
+{
+  "name": "AWS Serverless Metadata Workflow",
+  "short_name": "AWS Metadata",
+  "description": "Bradley Matera's deployable AWS internship capstone walkthrough, writing hub, proof map, and verified source library.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071426",
+  "theme_color": "#071426",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
