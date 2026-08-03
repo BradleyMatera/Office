@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bradleymatera.github.io/Office/sitemap.xml
