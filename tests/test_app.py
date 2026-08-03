@@ -34,17 +34,17 @@ class FakeS3Client:
 
 
 class FakeTable:
-    def __init__(self, duplicate: bool = False):
-        self.duplicate = duplicate
+    def __init__(self, error_code: str | None = None):
+        self.error_code = error_code
         self.items: list[dict] = []
 
     def put_item(self, **kwargs):
-        if self.duplicate:
+        if self.error_code:
             raise ClientError(
                 {
                     "Error": {
-                        "Code": "ConditionalCheckFailedException",
-                        "Message": "already exists",
+                        "Code": self.error_code,
+                        "Message": "simulated table error",
                     }
                 },
                 "PutItem",
@@ -131,12 +131,49 @@ def test_lambda_handler_stores_normalized_metadata(monkeypatch, s3_event, head_r
 
 def test_duplicate_event_is_safe(monkeypatch, s3_event, head_response):
     monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
-    monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable(duplicate=True))
+    monkeypatch.setattr(
+        app,
+        "_METADATA_TABLE",
+        FakeTable(error_code="ConditionalCheckFailedException"),
+    )
 
     result = app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-duplicate"))
 
     assert result["processed"] == 1
     assert result["results"][0]["status"] == "duplicate"
+
+
+def test_unexpected_table_error_is_retried_by_lambda(monkeypatch, s3_event, head_response):
+    monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
+    monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable(error_code="AccessDeniedException"))
+
+    with pytest.raises(RuntimeError, match="One or more records failed"):
+        app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-denied"))
+
+
+def test_unversioned_object_uses_event_etag_and_default_fields(monkeypatch, s3_event):
+    del s3_event["Records"][0]["s3"]["object"]["versionId"]
+    head = {"ContentLength": 12, "Metadata": {}}
+    fake_s3 = FakeS3Client(head)
+    fake_table = FakeTable()
+    monkeypatch.setattr(app, "_S3_CLIENT", fake_s3)
+    monkeypatch.setattr(app, "_METADATA_TABLE", fake_table)
+
+    result = app.lambda_handler(s3_event, None)
+
+    assert result["aws_request_id"] is None
+    assert fake_s3.calls == [
+        {
+            "Bucket": "metadata-intake-bucket",
+            "Key": "incoming/quarterly report.pdf",
+        }
+    ]
+    stored = fake_table.items[0]
+    assert stored["ETag"] == "event-etag"
+    assert stored["ContentType"] == "application/octet-stream"
+    assert stored["StorageClass"] == "STANDARD"
+    assert stored["LastModified"] == "unknown"
+    assert "VersionId" not in stored
 
 
 def test_rejects_non_s3_event(monkeypatch, s3_event, head_response):
@@ -157,6 +194,52 @@ def test_rejects_unsupported_event_major_version(monkeypatch, s3_event, head_res
         app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-bad-version"))
 
 
+def test_rejects_invalid_event_version(monkeypatch, s3_event, head_response):
+    s3_event["Records"][0]["eventVersion"] = "not-a-version"
+    monkeypatch.setattr(app, "_S3_CLIENT", FakeS3Client(head_response))
+    monkeypatch.setattr(app, "_METADATA_TABLE", FakeTable())
+
+    with pytest.raises(RuntimeError, match="One or more records failed"):
+        app.lambda_handler(s3_event, SimpleNamespace(aws_request_id="request-invalid-version"))
+
+
 def test_requires_records_list():
     with pytest.raises(ValueError, match="non-empty S3 Records list"):
         app.lambda_handler({}, SimpleNamespace(aws_request_id="request-empty"))
+
+
+def test_metadata_table_requires_environment_variable(monkeypatch):
+    monkeypatch.delenv("TABLE_NAME", raising=False)
+    with pytest.raises(RuntimeError, match="TABLE_NAME environment variable is required"):
+        app._get_metadata_table()
+
+
+def test_lazy_clients_are_cached(monkeypatch):
+    fake_client = object()
+    fake_table = object()
+    fake_resource = SimpleNamespace(Table=lambda name: fake_table)
+    client_calls: list[str] = []
+    resource_calls: list[str] = []
+
+    def client(service_name: str):
+        client_calls.append(service_name)
+        return fake_client
+
+    def resource(service_name: str):
+        resource_calls.append(service_name)
+        return fake_resource
+
+    monkeypatch.setattr(app.boto3, "client", client)
+    monkeypatch.setattr(app.boto3, "resource", resource)
+
+    assert app._get_s3_client() is fake_client
+    assert app._get_s3_client() is fake_client
+    assert app._get_metadata_table() is fake_table
+    assert app._get_metadata_table() is fake_table
+    assert client_calls == ["s3"]
+    assert resource_calls == ["dynamodb"]
+
+
+def test_isoformat_supports_none_and_plain_values():
+    assert app._isoformat(None) is None
+    assert app._isoformat("already-formatted") == "already-formatted"
