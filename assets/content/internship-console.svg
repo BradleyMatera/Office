@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">AWS internship troubleshooting console illustration</title>
+  <desc id="desc">A dark technical workspace showing a cloud event moving through logs, a Lambda-style function node, and a metadata table.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071426"/><stop offset="1" stop-color="#12345c"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#173b68"/><stop offset="1" stop-color="#0d213a"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="800" height="450" rx="30" fill="url(#bg)"/>
+  <g opacity=".12" stroke="#91c5ff"><path d="M0 75h800M0 150h800M0 225h800M0 300h800M0 375h800"/><path d="M100 0v450M200 0v450M300 0v450M400 0v450M500 0v450M600 0v450M700 0v450"/></g>
+  <rect x="54" y="62" width="692" height="326" rx="20" fill="url(#panel)" stroke="#4c8bd7"/>
+  <circle cx="82" cy="88" r="6" fill="#fb7185"/><circle cx="104" cy="88" r="6" fill="#fbbf24"/><circle cx="126" cy="88" r="6" fill="#34d399"/>
+  <rect x="82" y="124" width="270" height="220" rx="12" fill="#081729" stroke="#345b86"/>
+  <g fill="#91c5ff"><rect x="104" y="151" width="154" height="9" rx="4"/><rect x="104" y="177" width="216" height="9" rx="4" opacity=".65"/><rect x="104" y="203" width="188" height="9" rx="4" opacity=".8"/><rect x="104" y="229" width="230" height="9" rx="4" opacity=".45"/><rect x="104" y="255" width="176" height="9" rx="4" opacity=".7"/></g>
+  <rect x="104" y="291" width="124" height="28" rx="14" fill="#ff9900"/><path d="M238 305h66" stroke="#75b6ff" stroke-width="4" stroke-linecap="round"/>
+  <g transform="translate(417 125)"><circle cx="74" cy="73" r="58" fill="#0a1d35" stroke="#75b6ff" stroke-width="3"/><path d="M50 60l23-18 23 18v35L73 110 50 95z" fill="#2474e5"/><path d="M73 42v68M50 60l46 35M96 60L50 95" stroke="#dcecff" stroke-width="3" opacity=".9"/></g>
+  <path d="M350 235c48 0 50-38 89-38" stroke="#ff9900" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#glow)"/><path d="M560 198c46 0 56 40 98 40" stroke="#75b6ff" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <g transform="translate(612 151)"><rect width="96" height="166" rx="14" fill="#0a1d35" stroke="#4c8bd7"/><rect x="17" y="22" width="62" height="13" rx="5" fill="#ff9900"/><g fill="#91c5ff"><rect x="17" y="54" width="62" height="8" rx="4"/><rect x="17" y="76" width="48" height="8" rx="4" opacity=".7"/><rect x="17" y="98" width="62" height="8" rx="4" opacity=".55"/><rect x="17" y="120" width="38" height="8" rx="4" opacity=".8"/></g></g>
+  <g fill="#dcecff" font-family="Arial,sans-serif" font-weight="700"><text x="86" y="374" font-size="18">observe</text><text x="280" y="374" font-size="18">isolate</text><text x="471" y="374" font-size="18">verify</text><text x="635" y="374" font-size="18">document</text></g>
+</svg>
