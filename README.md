@@ -5,65 +5,70 @@
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-1f883d)](https://bradleymatera.github.io/Office/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A deployable, tested, officially sourced, and fully documented public reconstruction of the AWS serverless metadata workflow I built during my AWS Support Engineering internship.
+An event-driven AWS project that turns Amazon S3 file uploads into normalized DynamoDB metadata records using AWS Lambda.
 
-## Public AWS hub
-
-- **Workflow walkthrough:** https://bradleymatera.github.io/Office/
-- **AWS writing:** https://bradleymatera.github.io/Office/writing.html
-- **Proof map:** https://bradleymatera.github.io/Office/proof.html
-- **Verified AWS sources:** https://bradleymatera.github.io/Office/sources.html
-- **Design system:** https://bradleymatera.github.io/Office/design-system.html
-- **Recruiter portfolio:** https://bradleymatera.dev/recruiter/
+- **Project site:** https://bradleymatera.github.io/Office/
+- **Clean resume link:** https://bradleymatera.dev/aws-metadata-workflow/
+- **AWS articles:** https://bradleymatera.github.io/Office/writing.html
+- **Project evidence:** https://bradleymatera.github.io/Office/proof.html
+- **AWS documentation references:** https://bradleymatera.github.io/Office/sources.html
+- **Portfolio:** https://bradleymatera.dev/recruiter/
 
 ![AWS Serverless Metadata Workflow architecture](assets/architecture-overview.svg)
 
-## What the system does
+## How the workflow works
 
 1. A file is uploaded under a configurable Amazon S3 key prefix, defaulting to `incoming/`.
 2. S3 sends an object-created notification to AWS Lambda.
 3. The Python 3.12 function validates the event, URL-decodes the object key, and calls `HeadObject`.
-4. It normalizes current object metadata into a versioned data contract.
+4. The function normalizes the object metadata into a versioned record.
 5. It creates a deterministic SHA-256 `RecordId` from the bucket, decoded key, version ID, and ETag.
-6. It writes the item to DynamoDB with `attribute_not_exists(RecordId)` so repeated event delivery is safe.
+6. It writes the record to DynamoDB with `attribute_not_exists(RecordId)` so repeated event delivery is safe.
 7. Unexpected failures are raised for Lambda asynchronous retry.
-8. Events that still fail are sent to an encrypted SQS destination.
-9. CloudWatch alarms monitor Lambda errors, Lambda throttles, and failed events waiting in the queue.
-10. An optional SNS email path makes those alarms actionable after the recipient confirms the subscription.
+8. Events that still fail are sent to an encrypted SQS failure destination.
+9. CloudWatch alarms monitor Lambda errors, throttles, and failed events waiting in the queue.
+10. An optional SNS email subscription makes those alarms actionable.
 
-The implementation reads object headers. It does **not** download or parse the complete file body.
+The function reads object headers. It does **not** download or parse the complete file body.
 
-## Why this repository exists
+## Original internship project and public implementation
 
-The original work was completed in isolated AWS internship training and project environments without production customer data. This repository preserves the real architecture, engineering decisions, cost reasoning, and troubleshooting process while intentionally excluding confidential or internal-only material.
+The original workflow was built during my AWS Support Engineering internship in isolated training and project environments. It connected S3, Lambda, DynamoDB, and a static presentation layer and included a usage-based infrastructure cost model.
 
-The repository is both:
+This repository is a public reconstruction and expansion of that architecture. It does not contain confidential Amazon source files, customer data, production account information, or production support access.
 
-- the permanent AWS internship walkthrough linked from my resumes
-- a deployable AWS SAM application that an authorized user can validate, test, build, and deploy
-- an AWS writing hub that links to canonical articles on my personal site and selected DEV editions
-- a transparent proof map separating original implementation evidence from supporting context
-- an official-source verification layer mapping service claims to current AWS documentation
+The public implementation adds:
 
-## Verified status
+- AWS SAM and CloudFormation infrastructure
+- a Python 3.12 Lambda function
+- deterministic record identity
+- idempotent DynamoDB writes
+- asynchronous retries and an encrypted SQS failure destination
+- CloudWatch alarms and optional SNS email notifications
+- unit tests and coverage enforcement
+- deployment, operations, cleanup, and troubleshooting documentation
+- a static project site with architecture diagrams and related AWS articles
 
-An independent local audit on August 3, 2026 produced:
+## Current verification
+
+The August 3, 2026 local audit produced:
 
 - **11 passing tests**
 - **100% statement coverage**
 - **100% branch coverage**
 
-The repository CI requires at least 85% coverage and also performs:
+The CI workflow also runs:
 
 - Python compilation
 - Ruff linting across `src`, `tests`, and `scripts`
+- Pytest with branch coverage
 - static-site validation
 - AWS SAM template linting
 - AWS SAM application build
 
-A separate scheduled workflow checks the live GitHub Pages routes, CSS, social preview, sitemap, RSS feed, and machine-readable project summary.
+A separate scheduled workflow checks the published Pages routes, stylesheets, social image, sitemap, RSS feed, and machine-readable summary.
 
-## Infrastructure implemented
+## Infrastructure
 
 ### Amazon S3
 
@@ -80,7 +85,6 @@ A separate scheduled workflow checks the live GitHub Pages routes, CSS, social p
 - Python 3.12 ARM64 runtime
 - 256 MB memory and 30-second timeout
 - active X-Ray tracing
-- least-privilege SAM policy templates
 - version-aware `HeadObject` requests
 - structured JSON logs
 - one-hour maximum asynchronous event age
@@ -107,6 +111,8 @@ A separate scheduled workflow checks the live GitHub Pages routes, CSS, social p
 - deployment, recovery, troubleshooting, and cleanup runbooks
 
 ## Lambda behavior
+
+The Lambda function:
 
 - validates the S3 event major version
 - rejects unsupported event sources and empty record lists
@@ -148,11 +154,11 @@ Unexpected asynchronous failure
  encrypted SQS failure queue ----> queue-depth alarm ----> optional SNS email
 ```
 
-The public GitHub Pages site is separate from the private AWS deployment. It contains code, documentation, writing previews, examples, and diagrams, but no AWS credentials and no direct access to uploaded objects or cloud resources.
+The GitHub Pages site is separate from any AWS deployment. It contains code, documentation, examples, and diagrams but no AWS credentials and no direct access to uploaded objects or cloud resources.
 
 ![Security boundary](assets/security-boundary.svg)
 
-## Normalized metadata record
+## Metadata record
 
 The DynamoDB partition key is `RecordId`, a deterministic SHA-256 hash derived from:
 
@@ -188,7 +194,7 @@ Representative item:
 
 See [Metadata Data Contract](docs/data-contract.md).
 
-## Quick start
+## Run the checks
 
 ### Prerequisites
 
@@ -196,14 +202,14 @@ See [Metadata Data Contract](docs/data-contract.md).
 - AWS CLI
 - AWS SAM CLI
 - Docker when a containerized SAM build is required
-- authorized AWS credentials
-
-### Run every local check
+- authorized AWS credentials for deployment
 
 ```bash
 make install
 make check
 ```
+
+`make check` runs compilation, linting, tests, static-site validation, SAM validation, and the SAM build.
 
 Individual commands:
 
@@ -216,7 +222,7 @@ make validate
 make build
 ```
 
-### Deploy
+## Deploy
 
 ```bash
 sam deploy --guided \
@@ -232,13 +238,9 @@ The guided deployment asks for:
 
 When an email is supplied, the recipient must confirm the SNS subscription before alarm notifications are delivered.
 
-### Read outputs
+Read the [Deployment Guide](docs/deployment.md) before creating or deleting resources.
 
-```bash
-make outputs
-```
-
-### Trigger the workflow
+## Test a deployed stack
 
 ```bash
 printf 'metadata workflow test\n' > sample.txt
@@ -249,7 +251,7 @@ aws s3 cp sample.txt \
   --metadata source=readme
 ```
 
-### Verify processing
+Then inspect the function logs and DynamoDB records:
 
 ```bash
 aws logs tail /aws/lambda/YOUR_FUNCTION_NAME \
@@ -262,8 +264,6 @@ aws dynamodb scan \
   --table-name YOUR_METADATA_TABLE \
   --max-items 10
 ```
-
-Read the [Deployment Guide](docs/deployment.md) before creating or deleting resources.
 
 ## Reliability model
 
@@ -288,13 +288,13 @@ The SAM template configures:
 - encrypted SQS on-failure destination
 - queue-depth alarm for messages waiting for investigation
 
-The [Operations Runbook](docs/operations-runbook.md) explains controlled investigation and replay.
+The [Operations Runbook](docs/operations-runbook.md) explains investigation and replay.
 
-### Data protection and deletion
+### Retained data
 
 The upload bucket and metadata table use `DeletionPolicy: Retain` and `UpdateReplacePolicy: Retain`. Deleting the stack therefore does not silently destroy uploaded files or metadata.
 
-A retained versioned bucket can also retain its event-notification configuration after stack deletion. Before deleting or repurposing the bucket, inspect and intentionally remove or replace that notification configuration so it does not reference a deleted Lambda function.
+A retained versioned bucket can also retain its event-notification configuration after stack deletion. Inspect and intentionally remove or replace that notification before repurposing the bucket.
 
 ## Cost model
 
@@ -312,71 +312,54 @@ The architecture is explained through measurable usage rather than a universal p
 
 See [Cost Model](docs/cost-model.md) and [AWS Free Tier: What Actually Costs Money](https://bradleymatera.dev/aws-free-tier-honest-guide/).
 
-## AWS writing
-
-The site links to seven canonical articles sourced from the public MDX frontmatter in my blog repository:
+## AWS articles
 
 - [AWS Cloud Support Internship: What I Actually Practiced](https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/)
-- [How I Built ProjectHub: An Embeddable AI Recruiter Assistant That Runs on Free Tiers](https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/)
 - [AWS Free Tier: What Actually Costs Money](https://bradleymatera.dev/aws-free-tier-honest-guide/)
 - [AWS vs. Azure vs. Google Cloud: A 2026 Free Tier Comparison From Real Use](https://bradleymatera.dev/aws-vs-azure-vs-google-cloud/)
 - [Cognito Authentication With React: A Small, Verifiable Setup](https://bradleymatera.dev/secure-authentication-cognito-react/)
 - [Certifications and Continuous Learning: A Simple Track](https://bradleymatera.dev/certifications-continuous-learning/)
-- [From Combat Medic to Software Engineer: Translating a Non-Traditional Background](https://bradleymatera.dev/from-medic-to-engineer/)
+- [How I Built ProjectHub: An Embeddable AI Recruiter Assistant That Runs on Free Tiers](https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/)
+- [From Combat Medic to Software Engineer](https://bradleymatera.dev/from-medic-to-engineer/)
 
-The [AWS Writing Hub](writing.html) provides teasers and selected DEV editions without copying full articles into this repository.
+The [AWS articles page](writing.html) presents short summaries and links to the original posts.
 
-## Proof and official-source verification
+## Interface
 
-- [Proof Map](proof.html) identifies what each repository, credential, article source, and test result establishes and what it does not prove.
-- [Verified AWS Sources](sources.html) maps load-bearing claims to current official AWS documentation.
-- [Verified AWS Sources, Markdown](docs/verified-aws-sources.md) preserves the same mapping in the repository.
-- [AWS Evidence Design System](design-system.html) documents the visible visual and content contract.
-- [Design System Specification](docs/design-system.md) defines tokens, components, accessibility, SEO, illustration rules, and content governance.
+The static site follows the visual foundation and information patterns of the open-source [Cloudscape Design System](https://cloudscape.design/), which was created for and is used by AWS products. The implementation uses semantic HTML and CSS rather than importing Cloudscape's React component package.
 
-## Production web surface
+Applied principles include:
 
-The GitHub Pages project includes:
+- Open Sans typography and compact information density
+- AWS-style dark application header
+- restrained blue, gray, green, and orange status colors
+- bordered containers instead of decorative marketing cards
+- key-value panels, status indicators, alerts, tables, and compact actions
+- responsive navigation, keyboard focus states, skip links, semantic landmarks, and reduced-motion behavior
 
-- workflow landing page
-- AWS writing hub
-- proof map
-- official AWS source map
-- visible design-system reference
-- custom 404 recovery page
-- first-party architecture and editorial SVG assets
-- 1200×630 social preview PNG
-- Open Graph and Twitter metadata
-- JSON-LD for software, site, collection, profile, technical article, and FAQ content
-- `robots.txt`
-- `sitemap.xml`
-- `rss.xml`
-- `llms.txt`
-- `humans.txt`
-- `site.webmanifest`
-- static validation and daily live-site health monitoring
+The project is not an AWS product and does not imply endorsement by AWS.
 
-## Project history
+## Documentation
 
-- **February 2025:** early S3-to-DynamoDB metadata-table discussions established the technical precursor.
-- **May to August 2025:** the design became an AWS internship serverless metadata capstone.
-- **July 2025:** the completed system was described as S3 upload to Lambda metadata extraction to DynamoDB storage, with monitoring, security, testing, frontend presentation, and cost reasoning.
-- **August 2026:** the public reconstruction added deployable infrastructure, production-style code, tests, CI, failure handling, alarms, runbooks, original graphics, AWS writing, proof, official-source verification, a design system, SEO files, and live Pages monitoring.
-
-See [Project History](docs/project-history.md).
-
-## Truthful public description
-
-> Built an event-driven AWS metadata workflow during an AWS Support Engineering internship using S3, Lambda, DynamoDB, and a static frontend layer; created a measurable usage-based cost model and later reconstructed the system publicly with AWS SAM, idempotent writes, retries, an encrypted failure queue, actionable monitoring, tests, security controls, original diagrams, verified official AWS sources, and full technical documentation.
-
-### This repository does not claim
-
-- production customer ownership
-- live enterprise ticket ownership
-- unrestricted Amazon administrative access
-- that every public file is the exact original internal internship file
-- that confidential Amazon material is included
-- that a live AWS stack is currently connected to the GitHub Pages site
+| Area | Document |
+|---|---|
+| Architecture | [Architecture](docs/architecture.md) |
+| Decision record | [ADR 001](docs/architecture-decisions/001-event-driven-serverless.md) |
+| Implementation | [Implementation Notes](docs/implementation-notes.md) |
+| Deployment | [Deployment Guide](docs/deployment.md) |
+| Data | [Metadata Data Contract](docs/data-contract.md) |
+| Operations | [Operations Runbook](docs/operations-runbook.md) |
+| Troubleshooting | [Troubleshooting Guide](docs/troubleshooting.md) |
+| Security | [Security and Scope](docs/security-and-scope.md) |
+| Cost | [Cost Model](docs/cost-model.md) |
+| Testing | [Testing and Validation](docs/testing-and-validation.md) |
+| AWS behavior | [Verified AWS Sources](docs/verified-aws-sources.md) |
+| Interface implementation | [Cloudscape Interface Notes](docs/design-system.md) |
+| Accessibility | [Accessibility Notes](docs/accessibility.md) |
+| History | [Project History](docs/project-history.md) |
+| Interviews | [Interview Guide](docs/interview-guide.md) |
+| FAQ | [Frequently Asked Questions](docs/faq.md) |
+| Resume wording | [Resume Reference](RESUME_REFERENCE.md) |
 
 ## Repository structure
 
@@ -395,37 +378,17 @@ See [Project History](docs/project-history.md).
 │   └── security-boundary.svg
 ├── data/aws-content.json
 ├── docs/
-│   ├── architecture-decisions/001-event-driven-serverless.md
-│   ├── accessibility.md
-│   ├── architecture.md
-│   ├── cost-model.md
-│   ├── data-contract.md
-│   ├── deployment.md
-│   ├── design-system.md
-│   ├── faq.md
-│   ├── implementation-notes.md
-│   ├── interview-guide.md
-│   ├── operations-runbook.md
-│   ├── project-history.md
-│   ├── security-and-scope.md
-│   ├── testing-and-validation.md
-│   ├── troubleshooting.md
-│   └── verified-aws-sources.md
 ├── events/
-│   ├── README.md
-│   └── s3-object-created.json
 ├── scripts/validate_site.py
 ├── src/metadata_extractor/
-│   ├── __init__.py
-│   └── app.py
 ├── tests/test_app.py
 ├── 404.html
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── Makefile
 ├── README.md
+├── RESUME_REFERENCE.md
 ├── SECURITY.md
-├── design-system.html
 ├── favicon.svg
 ├── hub.css
 ├── humans.txt
@@ -444,26 +407,18 @@ See [Project History](docs/project-history.md).
 └── writing.html
 ```
 
-## Documentation index
+## Public description
 
-| Area | Document |
-|---|---|
-| Architecture | [Architecture](docs/architecture.md) |
-| Decision record | [ADR 001](docs/architecture-decisions/001-event-driven-serverless.md) |
-| Implementation | [Implementation Notes](docs/implementation-notes.md) |
-| Deployment | [Deployment Guide](docs/deployment.md) |
-| Data | [Metadata Data Contract](docs/data-contract.md) |
-| Operations | [Operations Runbook](docs/operations-runbook.md) |
-| Troubleshooting | [Troubleshooting Guide](docs/troubleshooting.md) |
-| Security | [Security and Scope](docs/security-and-scope.md) |
-| Cost | [Cost Model](docs/cost-model.md) |
-| Testing | [Testing and Validation](docs/testing-and-validation.md) |
-| Verified AWS behavior | [Verified AWS Sources](docs/verified-aws-sources.md) |
-| Design system | [AWS Evidence Design System](docs/design-system.md) |
-| Accessibility | [Accessibility Notes](docs/accessibility.md) |
-| History | [Project History](docs/project-history.md) |
-| Interviews | [Interview Guide](docs/interview-guide.md) |
-| FAQ | [Frequently Asked Questions](docs/faq.md) |
+> Built an event-driven AWS metadata workflow during an AWS Support Engineering internship using S3, Lambda, DynamoDB, and a static frontend layer; created a measurable usage-based cost model and later reconstructed the system publicly with AWS SAM, idempotent writes, retries, an encrypted failure queue, monitoring, tests, security controls, diagrams, official AWS references, and technical documentation.
+
+### This repository does not claim
+
+- production customer ownership
+- live enterprise ticket ownership
+- unrestricted Amazon administrative access
+- that every public file is an exact internal internship file
+- that confidential Amazon material is included
+- that a live AWS stack is currently connected to the GitHub Pages site
 
 ## Author
 
