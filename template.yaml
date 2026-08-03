@@ -1,0 +1,149 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  Event-driven AWS serverless metadata workflow. Files uploaded to S3 trigger
+  a Python Lambda function that extracts object metadata and stores normalized
+  records in an encrypted DynamoDB table.
+
+Parameters:
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90]
+    Description: CloudWatch Logs retention period for the Lambda function.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures:
+      - arm64
+    MemorySize: 256
+    Timeout: 30
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+
+Resources:
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+      Tags:
+        - Key: Project
+          Value: aws-serverless-metadata-workflow
+
+  MetadataTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: RecordId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: RecordId
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: aws-serverless-metadata-workflow
+
+  FailureQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+      Tags:
+        - Key: Project
+          Value: aws-serverless-metadata-workflow
+
+  MetadataExtractorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/metadata_extractor/
+      Handler: app.lambda_handler
+      Description: Extracts S3 object metadata and stores normalized records in DynamoDB.
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MetadataTable
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref UploadBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MetadataTable
+      Events:
+        ObjectCreated:
+          Type: S3
+          Properties:
+            Bucket: !Ref UploadBucket
+            Events: s3:ObjectCreated:*
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 3600
+        MaximumRetryAttempts: 2
+        DestinationConfig:
+          OnFailure:
+            Type: SQS
+            Destination: !GetAtt FailureQueue.Arn
+      Tags:
+        Project: aws-serverless-metadata-workflow
+
+  MetadataExtractorLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: MetadataExtractorFunction
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${MetadataExtractorFunction}
+      RetentionInDays: !Ref LogRetentionDays
+
+  MetadataExtractorErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Alerts when the metadata extractor records one or more errors.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref MetadataExtractorFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  UploadBucketName:
+    Description: Upload files here to trigger metadata extraction.
+    Value: !Ref UploadBucket
+  MetadataTableName:
+    Description: DynamoDB table containing normalized metadata records.
+    Value: !Ref MetadataTable
+  MetadataExtractorFunctionName:
+    Description: Lambda function that processes S3 events.
+    Value: !Ref MetadataExtractorFunction
+  FailureQueueUrl:
+    Description: Queue receiving events that still fail after asynchronous retries.
+    Value: !Ref FailureQueue
