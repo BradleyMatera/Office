@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="920" viewBox="0 0 1200 920" role="img" aria-labelledby="title desc">
+  <title id="title">AWS Serverless Metadata Workflow Processing Flow</title>
+  <desc id="desc">Vertical step-by-step flow from file upload through S3 event trigger, Lambda extraction, metadata normalization, DynamoDB storage, and static presentation layer.</desc>
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .title { font: 700 34px Arial, sans-serif; fill: #0f172a; }
+      .stepTitle { font: 700 22px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 400 17px Arial, sans-serif; fill: #334155; }
+      .step { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; rx: 22; }
+      .number { fill: #1d4ed8; }
+      .numberText { font: 700 20px Arial, sans-serif; fill: #ffffff; }
+      .arrow { stroke: #1d4ed8; stroke-width: 5; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1d4ed8" />
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="920" />
+  <text class="title" x="60" y="70">Workflow Processing Sequence</text>
+
+  <g transform="translate(120 130)">
+    <rect class="step" width="960" height="92" rx="22"/>
+    <circle class="number" cx="58" cy="46" r="26"/><text class="numberText" x="50" y="53">1</text>
+    <text class="stepTitle" x="110" y="42">File Upload</text>
+    <text class="body" x="110" y="70">A file is uploaded into the S3 intake bucket that serves as the entry point to the workflow.</text>
+  </g>
+  <path class="arrow" d="M600 222 V262"/>
+
+  <g transform="translate(120 262)">
+    <rect class="step" width="960" height="92" rx="22"/>
+    <circle class="number" cx="58" cy="46" r="26"/><text class="numberText" x="50" y="53">2</text>
+    <text class="stepTitle" x="110" y="42">S3 Event Trigger</text>
+    <text class="body" x="110" y="70">The object creation event triggers the Lambda function without needing a long-running server.</text>
+  </g>
+  <path class="arrow" d="M600 354 V394"/>
+
+  <g transform="translate(120 394)">
+    <rect class="step" width="960" height="92" rx="22"/>
+    <circle class="number" cx="58" cy="46" r="26"/><text class="numberText" x="50" y="53">3</text>
+    <text class="stepTitle" x="110" y="42">Metadata Extraction</text>
+    <text class="body" x="110" y="70">Lambda reads object details and extracts the fields needed for the metadata record.</text>
+  </g>
+  <path class="arrow" d="M600 486 V526"/>
+
+  <g transform="translate(120 526)">
+    <rect class="step" width="960" height="92" rx="22"/>
+    <circle class="number" cx="58" cy="46" r="26"/><text class="numberText" x="50" y="53">4</text>
+    <text class="stepTitle" x="110" y="42">Normalization</text>
+    <text class="body" x="110" y="70">The extracted values are shaped into a consistent item structure suitable for DynamoDB storage.</text>
+  </g>
+  <path class="arrow" d="M600 618 V658"/>
+
+  <g transform="translate(120 658)">
+    <rect class="step" width="960" height="92" rx="22"/>
+    <circle class="number" cx="58" cy="46" r="26"/><text class="numberText" x="50" y="53">5</text>
+    <text class="stepTitle" x="110" y="42">Persistence</text>
+    <text class="body" x="110" y="70">The normalized metadata item is written into the FileMetadata table in DynamoDB.</text>
+  </g>
+  <path class="arrow" d="M600 750 V790"/>
+
+  <g transform="translate(120 790)">
+    <rect class="step" width="960" height="92" rx="22"/>
+    <circle class="number" cx="58" cy="46" r="26"/><text class="numberText" x="50" y="53">6</text>
+    <text class="stepTitle" x="110" y="42">Presentation and Explanation</text>
+    <text class="body" x="110" y="70">A static frontend explains the workflow, shows the architecture, and communicates cost and design reasoning.</text>
+  </g>
+</svg>
