@@ -11,7 +11,7 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import PurePosixPath
 from typing import Any
@@ -48,7 +48,7 @@ def _isoformat(value: Any) -> str | None:
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
     return str(value)
 
 
@@ -76,7 +76,6 @@ def _head_object(bucket: str, key: str, version_id: str | None) -> dict[str, Any
 
 def _normalize_item(record: dict[str, Any], head: dict[str, Any]) -> dict[str, Any]:
     _validate_event_version(record)
-
     s3_record = record["s3"]
     bucket = s3_record["bucket"]["name"]
     object_data = s3_record["object"]
@@ -92,7 +91,7 @@ def _normalize_item(record: dict[str, Any], head: dict[str, Any]) -> dict[str, A
         "FileName": PurePosixPath(key).name,
         "EventName": record.get("eventName", "unknown"),
         "EventTime": record.get("eventTime", "unknown"),
-        "ProcessedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "ProcessedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "SizeBytes": Decimal(str(head.get("ContentLength", object_data.get("size", 0)))),
         "ContentType": head.get("ContentType", "application/octet-stream"),
         "ETag": etag or "unknown",
@@ -101,7 +100,6 @@ def _normalize_item(record: dict[str, Any], head: dict[str, Any]) -> dict[str, A
         "Sequencer": object_data.get("sequencer", "unknown"),
         "UserMetadata": head.get("Metadata", {}),
     }
-
     optional_fields = {
         "VersionId": version_id,
         "CacheControl": head.get("CacheControl"),
@@ -113,7 +111,7 @@ def _normalize_item(record: dict[str, Any], head: dict[str, Any]) -> dict[str, A
         "ChecksumSHA1": head.get("ChecksumSHA1"),
         "ChecksumSHA256": head.get("ChecksumSHA256"),
     }
-    item.update({key_name: value for key_name, value in optional_fields.items() if value is not None})
+    item.update({name: value for name, value in optional_fields.items() if value is not None})
     return item
 
 
@@ -127,16 +125,12 @@ def _store_item(item: dict[str, Any]) -> str:
     except ClientError as exc:
         error_code = exc.response.get("Error", {}).get("Code")
         if error_code == "ConditionalCheckFailedException":
-            LOGGER.info(
-                json.dumps(
-                    {
-                        "message": "Duplicate S3 event ignored",
-                        "record_id": item["RecordId"],
-                        "bucket": item["Bucket"],
-                        "object_key": item["ObjectKey"],
-                    }
-                )
-            )
+            LOGGER.info(json.dumps({
+                "message": "Duplicate S3 event ignored",
+                "record_id": item["RecordId"],
+                "bucket": item["Bucket"],
+                "object_key": item["ObjectKey"],
+            }))
             return "duplicate"
         raise
 
@@ -144,29 +138,22 @@ def _store_item(item: dict[str, Any]) -> str:
 def process_record(record: dict[str, Any]) -> dict[str, str]:
     if record.get("eventSource") != "aws:s3":
         raise ValueError(f"Unsupported eventSource: {record.get('eventSource')!r}")
-
     _validate_event_version(record)
     s3_record = record["s3"]
     bucket = s3_record["bucket"]["name"]
     object_data = s3_record["object"]
     key = unquote_plus(object_data["key"])
     version_id = object_data.get("versionId")
-
     head = _head_object(bucket, key, version_id)
     item = _normalize_item(record, head)
     status = _store_item(item)
-
-    LOGGER.info(
-        json.dumps(
-            {
-                "message": "S3 metadata record processed",
-                "status": status,
-                "record_id": item["RecordId"],
-                "bucket": bucket,
-                "object_key": key,
-            }
-        )
-    )
+    LOGGER.info(json.dumps({
+        "message": "S3 metadata record processed",
+        "status": status,
+        "record_id": item["RecordId"],
+        "bucket": bucket,
+        "object_key": key,
+    }))
     return {"record_id": item["RecordId"], "status": status}
 
 
@@ -174,20 +161,16 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     records = event.get("Records")
     if not isinstance(records, list) or not records:
         raise ValueError("Expected a non-empty S3 Records list")
-
     results: list[dict[str, str]] = []
     failures: list[dict[str, str]] = []
-
     for index, record in enumerate(records):
         try:
             results.append(process_record(record))
-        except Exception as exc:  # Lambda must retry unexpected processing failures.
+        except Exception as exc:
             LOGGER.exception("Failed to process S3 record at index %s", index)
             failures.append({"index": str(index), "error": str(exc)})
-
     if failures:
         raise RuntimeError(json.dumps({"message": "One or more records failed", "failures": failures}))
-
     return {
         "processed": len(results),
         "results": results,
