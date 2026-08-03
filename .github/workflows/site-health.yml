@@ -1,0 +1,75 @@
+name: Monitor GitHub Pages Health
+
+on:
+  schedule:
+    - cron: "17 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-health
+  cancel-in-progress: true
+
+jobs:
+  check-live-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_URL: https://bradleymatera.github.io/Office
+
+    steps:
+      - name: Check critical public resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            "/"
+            "/writing.html"
+            "/proof.html"
+            "/sources.html"
+            "/design-system.html"
+            "/styles.css"
+            "/hub.css"
+            "/assets/og/aws-metadata-workflow.png"
+            "/sitemap.xml"
+            "/robots.txt"
+            "/rss.xml"
+            "/llms.txt"
+          )
+
+          for path in "${paths[@]}"; do
+            echo "Checking ${BASE_URL}${path}"
+            curl \
+              --fail \
+              --show-error \
+              --silent \
+              --location \
+              --retry 4 \
+              --retry-delay 3 \
+              --retry-all-errors \
+              --connect-timeout 15 \
+              --max-time 45 \
+              --output /dev/null \
+              "${BASE_URL}${path}"
+          done
+
+      - name: Verify page identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/" | grep -F "AWS Serverless Metadata Workflow"
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/writing.html" | grep -F "AWS writing built around real work"
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/proof.html" | grep -F "What can be opened, checked"
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/sources.html" | grep -F "The architecture checked against AWS"
+          curl --fail --silent --location --retry 4 --retry-all-errors "${BASE_URL}/design-system.html" | grep -F "technical portfolio system"
+
+      - name: Verify social image content type
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --head \
+            "${BASE_URL}/assets/og/aws-metadata-workflow.png" \
+            | tr -d '\r' \
+            | grep -i '^content-type: image/png'
