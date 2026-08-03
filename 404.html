@@ -4,40 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Page Not Found | AWS Serverless Metadata Workflow</title>
-  <meta name="description" content="The requested page was not found. Return to the AWS Serverless Metadata Workflow, writing hub, proof map, or verified source library." />
+  <meta name="description" content="The requested page was not found. Return to the AWS Serverless Metadata Workflow, project evidence, AWS articles, or official AWS documentation references." />
   <meta name="robots" content="noindex,follow" />
-  <meta name="theme-color" content="#071426" />
+  <meta name="theme-color" content="#232f3e" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="hub.css" />
 </head>
 <body class="page-shell">
   <a class="skip-link" href="#main-content">Skip to main content</a>
-  <main id="main-content" class="hero" style="min-height:100vh;display:grid;align-items:center">
-    <div class="container hero-layout">
-      <div>
-        <p class="eyebrow">404 · Route not found</p>
-        <h1>The event arrived, but this page does not exist</h1>
-        <p class="lead">
-          The public AWS hub is still available. Use one of the verified routes below instead of starting from a dead link.
-        </p>
-        <div class="hero-actions">
-          <a class="button primary" href="index.html">Open the workflow</a>
-          <a class="button" href="writing.html">Read AWS writing</a>
-          <a class="button" href="proof.html">View proof</a>
-          <a class="button" href="sources.html">Check AWS sources</a>
+
+  <header class="app-header">
+    <div class="app-header__inner">
+      <a class="app-brand" href="index.html">
+        <span class="app-brand__mark" aria-hidden="true">AWS</span>
+        <span>AWS Serverless Metadata Workflow</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="section" style="min-height:calc(100vh - 180px);display:grid;align-items:center">
+      <div class="container">
+        <div class="container-card" style="max-width:760px;margin-inline:auto">
+          <p class="page-label">404 · Page not found</p>
+          <h1>This page does not exist</h1>
+          <p class="lead">The link may be outdated or the page may have been removed. The project, source code, technical evidence, and AWS articles are still available.</p>
+          <div class="button-row">
+            <a class="button button--primary" href="index.html">Open project</a>
+            <a class="button button--normal" href="proof.html">Project evidence</a>
+            <a class="button button--normal" href="writing.html">AWS articles</a>
+            <a class="button button--normal" href="sources.html">AWS references</a>
+          </div>
         </div>
       </div>
-      <aside class="hero-panel">
-        <p class="panel-label">Recovery path</p>
-        <dl class="facts">
-          <div><dt>Primary site</dt><dd>Workflow walkthrough</dd></div>
-          <div><dt>Career context</dt><dd>Writing and proof</dd></div>
-          <div><dt>Technical legitimacy</dt><dd>Official AWS sources</dd></div>
-          <div><dt>Repository</dt><dd>GitHub source</dd></div>
-        </dl>
-      </aside>
-    </div>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <p><strong>Bradley Matera</strong> · AWS Serverless Metadata Workflow</p>
+  </footer>
 </body>
 </html>
