@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">AWS Serverless Metadata Workflow Architecture Overview</title>
+  <desc id="desc">Diagram showing a file upload source, Amazon S3 intake bucket, Lambda metadata extractor, DynamoDB metadata table, static frontend delivery layer, and monitoring support.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 18px Arial, sans-serif; fill: #475569; }
+      .label { font: 700 20px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 400 16px Arial, sans-serif; fill: #334155; }
+      .box { fill: white; stroke: #cbd5e1; stroke-width: 2; rx: 22; }
+      .accent { fill: #dbeafe; stroke: #60a5fa; stroke-width: 2; rx: 22; }
+      .success { fill: #ecfdf3; stroke: #34d399; stroke-width: 2; rx: 22; }
+      .amber { fill: #fff7ed; stroke: #fb923c; stroke-width: 2; rx: 22; }
+      .arrow { stroke: #1d4ed8; stroke-width: 4; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke: #64748b; stroke-width: 3; fill: none; stroke-dasharray: 10 8; marker-end: url(#arrowhead-gray); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1d4ed8" />
+    </marker>
+    <marker id="arrowhead-gray" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="720" />
+  <text class="title" x="60" y="62">AWS Serverless Metadata Workflow</text>
+  <text class="subtitle" x="60" y="94">Public architecture view of the internship capstone</text>
+
+  <rect class="box" x="60" y="190" width="180" height="120" rx="22" />
+  <text class="label" x="98" y="240">Upload Source</text>
+  <text class="small" x="95" y="270">User or file intake</text>
+  <text class="small" x="95" y="292">drops an object</text>
+
+  <rect class="accent" x="300" y="170" width="230" height="160" rx="22" />
+  <text class="label" x="365" y="228">Amazon S3</text>
+  <text class="small" x="343" y="258">Intake bucket stores</text>
+  <text class="small" x="331" y="280">uploaded file objects</text>
+
+  <rect class="success" x="620" y="170" width="250" height="160" rx="22" />
+  <text class="label" x="662" y="228">AWS Lambda</text>
+  <text class="small" x="645" y="258">MetadataExtractor</text>
+  <text class="small" x="650" y="280">parses and normalizes</text>
+  <text class="small" x="692" y="302">metadata</text>
+
+  <rect class="accent" x="930" y="170" width="210" height="160" rx="22" />
+  <text class="label" x="962" y="228">DynamoDB</text>
+  <text class="small" x="980" y="258">FileMetadata</text>
+  <text class="small" x="964" y="280">normalized records</text>
+  <text class="small" x="981" y="302">persist here</text>
+
+  <rect class="box" x="180" y="455" width="320" height="150" rx="22" />
+  <text class="label" x="233" y="512">Static Frontend Layer</text>
+  <text class="small" x="228" y="542">Accessible presentation of workflow,</text>
+  <text class="small" x="241" y="564">results, and cloud cost reasoning</text>
+  <text class="small" x="253" y="586">CloudFront or Amplify delivery</text>
+
+  <rect class="amber" x="720" y="455" width="260" height="150" rx="22" />
+  <text class="label" x="765" y="512">Monitoring Mindset</text>
+  <text class="small" x="763" y="542">CloudWatch-style logs,</text>
+  <text class="small" x="754" y="564">events, and operational checks</text>
+
+  <path class="arrow" d="M240 250 H300" />
+  <path class="arrow" d="M530 250 H620" />
+  <path class="arrow" d="M870 250 H930" />
+  <path class="dashed" d="M1035 330 V390 H340 V455" />
+  <path class="dashed" d="M745 330 V455" />
+
+  <text class="small" x="560" y="146">S3 event notification</text>
+  <text class="small" x="815" y="146">Write normalized item</text>
+  <text class="small" x="430" y="420">Presentation of extracted output</text>
+</svg>
