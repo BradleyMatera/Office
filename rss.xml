@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bradley Matera: AWS Writing and Internship Notes</title>
+    <link>https://bradleymatera.github.io/Office/writing.html</link>
+    <description>Canonical AWS, cloud, internship, architecture, authentication, certification, and career articles by Bradley Matera.</description>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 03 Aug 2026 19:00:00 GMT</lastBuildDate>
+    <atom:link href="https://bradleymatera.github.io/Office/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS Cloud Support Internship: What I Actually Practiced</title>
+      <link>https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/aws-cloud-support-internship-mastering-troubleshooting-and-architecture/</guid>
+      <pubDate>Wed, 08 Jul 2026 12:00:00 GMT</pubDate>
+      <description>A bounded summary of the AWS training environment, troubleshooting workflow, capstone project, and what the internship did not include.</description>
+    </item>
+    <item>
+      <title>How I Built ProjectHub: An Embeddable AI Recruiter Assistant That Runs on Free Tiers</title>
+      <link>https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/projecthub-embeddable-ai-recruiter-free-tiers/</guid>
+      <pubDate>Sat, 11 Jul 2026 12:00:00 GMT</pubDate>
+      <description>The architecture behind Scout, including grounded career facts, free-provider failover, safety checks, analytics, and graceful degradation.</description>
+    </item>
+    <item>
+      <title>AWS Free Tier: What Actually Costs Money</title>
+      <link>https://bradleymatera.dev/aws-free-tier-honest-guide/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/aws-free-tier-honest-guide/</guid>
+      <pubDate>Wed, 08 Jul 2026 12:00:00 GMT</pubDate>
+      <description>A practical AWS free-tier checklist covering active resources, cost alerts, cleanup, and verification.</description>
+    </item>
+    <item>
+      <title>AWS vs. Azure vs. Google Cloud: A 2026 Free Tier Comparison From Real Use</title>
+      <link>https://bradleymatera.dev/aws-vs-azure-vs-google-cloud/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/aws-vs-azure-vs-google-cloud/</guid>
+      <pubDate>Wed, 08 Jul 2026 12:00:00 GMT</pubDate>
+      <description>A real-use comparison of cloud free tiers, compute, databases, operating friction, and billing risk.</description>
+    </item>
+    <item>
+      <title>Cognito Authentication With React: A Small, Verifiable Setup</title>
+      <link>https://bradleymatera.dev/secure-authentication-cognito-react/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/secure-authentication-cognito-react/</guid>
+      <pubDate>Wed, 14 May 2025 12:00:00 GMT</pubDate>
+      <description>A minimal user-pool, app-client, React, Amplify, sign-in, and JWT verification walkthrough.</description>
+    </item>
+    <item>
+      <title>Certifications and Continuous Learning: A Simple Track</title>
+      <link>https://bradleymatera.dev/certifications-continuous-learning/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/certifications-continuous-learning/</guid>
+      <pubDate>Sat, 05 Apr 2025 12:00:00 GMT</pubDate>
+      <description>How certification study connected cloud theory to consoles, permissions, logs, architecture, and troubleshooting.</description>
+    </item>
+    <item>
+      <title>From Combat Medic to Software Engineer: Translating a Non-Traditional Background</title>
+      <link>https://bradleymatera.dev/from-medic-to-engineer/</link>
+      <guid isPermaLink="true">https://bradleymatera.dev/from-medic-to-engineer/</guid>
+      <pubDate>Sat, 11 Jan 2025 12:00:00 GMT</pubDate>
+      <description>How assessment, stabilization, handoff, documentation, and proof translated into engineering behavior.</description>
+    </item>
+  </channel>
+</rss>
