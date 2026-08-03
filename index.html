@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Serverless Metadata Workflow | Bradley Matera</title>
+  <meta name="description" content="A public technical case study documenting an AWS serverless metadata workflow built during an AWS Support Engineering internship." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">AWS Internship Capstone Case Study</p>
+      <h1>AWS Serverless Metadata Workflow</h1>
+      <p class="lead">
+        A public technical walkthrough of the metadata extraction workflow I built using
+        Amazon S3, AWS Lambda, Amazon DynamoDB, and a static frontend delivery layer.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="https://github.com/BradleyMatera/Office">View Repository</a>
+        <a class="button" href="https://bradleymatera.dev/recruiter/">Recruiter Portfolio</a>
+      </div>
+      <div class="callout">
+        This site documents a real internship project while intentionally omitting confidential internal details,
+        production customer data, and any claims that go beyond what was actually built.
+      </div>
+    </div>
+  </header>
+
+  <nav class="topnav">
+    <div class="container navlinks">
+      <a href="#overview">Overview</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#services">Services</a>
+      <a href="#cost">Cost Model</a>
+      <a href="#security">Security</a>
+      <a href="#docs">Docs</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="overview" class="section">
+      <div class="container two-col">
+        <div>
+          <h2>Project Overview</h2>
+          <p>
+            The goal of this workflow was to automatically capture and store object metadata using a
+            serverless AWS architecture. Instead of manually reviewing uploaded files, the workflow reacts
+            to file uploads, extracts useful metadata, and stores a normalized record for later reference.
+          </p>
+          <p>
+            The public version of the project highlights architecture, implementation logic, reasoning,
+            documentation style, and cloud cost awareness. It is meant to show real technical work in a
+            recruiter-safe and interview-safe format.
+          </p>
+          <ul class="bullets">
+            <li>Event-driven serverless design</li>
+            <li>Object metadata extraction from uploaded files</li>
+            <li>DynamoDB persistence for normalized metadata records</li>
+            <li>Static presentation layer for documentation and results</li>
+            <li>Transparent usage-based cost thinking</li>
+          </ul>
+        </div>
+        <aside class="card">
+          <h3>Tech Stack</h3>
+          <ul>
+            <li>Amazon S3</li>
+            <li>AWS Lambda</li>
+            <li>Amazon DynamoDB</li>
+            <li>CloudFront or Amplify</li>
+            <li>CloudWatch-style operational monitoring</li>
+            <li>HTML, CSS, and technical documentation</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section id="architecture" class="section alt">
+      <div class="container">
+        <h2>Architecture</h2>
+        <p class="section-intro">
+          The workflow is intentionally simple: storage, event trigger, compute, persistence, and presentation.
+          That simplicity is part of the strength of the design.
+        </p>
+        <img class="diagram" src="assets/architecture-overview.svg" alt="Architecture overview showing file upload into S3, S3 event notification into Lambda metadata extractor, metadata persistence into DynamoDB, and a static frontend presentation layer." />
+      </div>
+    </section>
+
+    <section id="workflow" class="section">
+      <div class="container">
+        <h2>Processing Workflow</h2>
+        <img class="diagram" src="assets/processing-flow.svg" alt="Processing flow from file upload to metadata storage and presentation." />
+        <div class="grid three-up">
+          <div class="card">
+            <h3>1. Upload</h3>
+            <p>A file is added to an S3 bucket used as the workflow intake point.</p>
+          </div>
+          <div class="card">
+            <h3>2. Trigger</h3>
+            <p>The upload event triggers a Lambda function that handles extraction logic.</p>
+          </div>
+          <div class="card">
+            <h3>3. Extract</h3>
+            <p>The function reads object information and derives structured metadata.</p>
+          </div>
+          <div class="card">
+            <h3>4. Normalize</h3>
+            <p>Metadata fields are shaped into a consistent, queryable record format.</p>
+          </div>
+          <div class="card">
+            <h3>5. Persist</h3>
+            <p>The normalized record is stored in DynamoDB for later viewing and analysis.</p>
+          </div>
+          <div class="card">
+            <h3>6. Present</h3>
+            <p>A static frontend documents the architecture, workflow, and output in an accessible way.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="section alt">
+      <div class="container">
+        <h2>AWS Services Used</h2>
+        <div class="grid two-up">
+          <div class="card">
+            <h3>Amazon S3</h3>
+            <p>Used as the file intake layer and event source for object uploads.</p>
+          </div>
+          <div class="card">
+            <h3>AWS Lambda</h3>
+            <p>Runs extraction logic without managing servers or provisioning long-lived compute.</p>
+          </div>
+          <div class="card">
+            <h3>Amazon DynamoDB</h3>
+            <p>Stores extracted metadata records in a normalized, low-overhead NoSQL structure.</p>
+          </div>
+          <div class="card">
+            <h3>CloudFront or Amplify</h3>
+            <p>Supports static delivery of the frontend documentation and demonstration layer.</p>
+          </div>
+        </div>
+        <img class="diagram small" src="assets/data-model.svg" alt="Simplified data model for metadata records stored in DynamoDB." />
+      </div>
+    </section>
+
+    <section id="cost" class="section">
+      <div class="container two-col">
+        <div>
+          <h2>Cost Model</h2>
+          <p>
+            A major part of the project was not just building the workflow, but explaining what drives cost.
+            The public case study keeps that same mindset by breaking the system into measurable usage inputs.
+          </p>
+          <ul class="bullets">
+            <li>S3 storage consumed by uploaded files</li>
+            <li>S3 request activity for object operations</li>
+            <li>Lambda invocation count and execution duration</li>
+            <li>DynamoDB reads and writes</li>
+            <li>Static delivery and transfer considerations</li>
+          </ul>
+        </div>
+        <aside class="card">
+          <h3>Why it matters</h3>
+          <p>
+            Cost awareness turns a school-style or demo-style project into something closer to real cloud engineering.
+            It shows that architecture decisions have operational consequences.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="security" class="section alt">
+      <div class="container">
+        <h2>Security and Scope Boundaries</h2>
+        <div class="grid two-up">
+          <div class="card success">
+            <h3>What is true</h3>
+            <ul>
+              <li>The project was built in an AWS internship training environment.</li>
+              <li>The architecture used Lambda, DynamoDB, S3, and a static frontend layer.</li>
+              <li>The project emphasizes event-driven design, documentation, and cost awareness.</li>
+            </ul>
+          </div>
+          <div class="card warning">
+            <h3>What is intentionally not claimed</h3>
+            <ul>
+              <li>No production customer ownership is claimed.</li>
+              <li>No confidential internal implementation details are exposed.</li>
+              <li>No public trust is implied by the project itself.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="docs" class="section">
+      <div class="container">
+        <h2>Further Documentation</h2>
+        <div class="grid two-up">
+          <a class="doclink" href="docs/architecture.md">
+            <h3>Architecture</h3>
+            <p>Service layout, event flow, and component responsibilities.</p>
+          </a>
+          <a class="doclink" href="docs/implementation-notes.md">
+            <h3>Implementation Notes</h3>
+            <p>How the workflow was built and how the public case-study version is structured.</p>
+          </a>
+          <a class="doclink" href="docs/security-and-scope.md">
+            <h3>Security and Scope</h3>
+            <p>Boundary-setting, public-safe documentation choices, and claim discipline.</p>
+          </a>
+          <a class="doclink" href="docs/cost-model.md">
+            <h3>Cost Model</h3>
+            <p>The measurable inputs that drive ongoing cloud usage.</p>
+          </a>
+          <a class="doclink" href="docs/testing-and-validation.md">
+            <h3>Testing and Validation</h3>
+            <p>How the workflow was reasoned about, checked, and documented.</p>
+          </a>
+          <a class="doclink" href="docs/future-improvements.md">
+            <h3>Future Improvements</h3>
+            <p>How this could evolve into a more complete cloud engineering portfolio artifact.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p><strong>Bradley Matera</strong> · Full-Stack Software Engineer · AWS Certified Solutions Architect - Associate</p>
+      <p>
+        <a href="https://bradleymatera.dev/recruiter/">Recruiter Portfolio</a>
+        <span>·</span>
+        <a href="https://github.com/BradleyMatera/Office">GitHub Repository</a>
+        <span>·</span>
+        <a href="https://www.linkedin.com/in/bradmatera/">LinkedIn</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
