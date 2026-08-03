@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Evidence Design System | Bradley Matera</title>
+  <meta name="description" content="The visual, accessibility, content, component, and governance system used by Bradley Matera's AWS Serverless Metadata Workflow public portfolio site." />
+  <meta name="author" content="Bradley Matera" />
+  <meta name="theme-color" content="#071426" />
+  <link rel="canonical" href="https://bradleymatera.github.io/Office/design-system.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AWS Evidence Design System" />
+  <meta property="og:description" content="Tokens, components, illustration rules, accessibility acceptance criteria, SEO requirements, and content-governance boundaries." />
+  <meta property="og:url" content="https://bradleymatera.github.io/Office/design-system.html" />
+  <meta property="og:image" content="https://bradleymatera.github.io/Office/assets/og/aws-metadata-workflow.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="hub.css" />
+</head>
+<body class="page-shell">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="subhero">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">AWS Metadata Workflow</a><span aria-hidden="true">/</span><span>Design system</span></nav>
+      <p class="eyebrow">AWS Evidence Design System · version 1.0.0</p>
+      <h1>A technical portfolio system built for trust before decoration</h1>
+      <p class="lead">
+        This is the shared visual and content contract for the workflow, writing, proof, and verified-source pages.
+        It defines tokens, components, illustration rules, accessibility acceptance criteria, SEO requirements,
+        and the language boundaries that prevent the site from drifting into unsupported claims.
+      </p>
+      <nav class="page-tabs" aria-label="AWS hub sections">
+        <a href="index.html">Workflow</a>
+        <a href="writing.html">Writing</a>
+        <a href="proof.html">Proof</a>
+        <a href="sources.html">Verified sources</a>
+        <a href="design-system.html" aria-current="page">Design system</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="section">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Principles</p>
+          <h2>Five rules guide every page</h2>
+        </div>
+        <div class="grid three-up">
+          <article class="card"><p class="card-number">01</p><h3>Verified before impressive</h3><p>Proof, code, source links, official documentation, and scope boundaries come before visual spectacle.</p></article>
+          <article class="card"><p class="card-number">02</p><h3>Operational, not fictional</h3><p>Graphics resemble systems, data, runbooks, and dashboards instead of fake live-account screenshots.</p></article>
+          <article class="card"><p class="card-number">03</p><h3>Plain language, real depth</h3><p>Recruiters can understand the headline while engineers can keep drilling into implementation detail.</p></article>
+          <article class="card"><p class="card-number">04</p><h3>Accessible by default</h3><p>Keyboard access, contrast, reduced motion, descriptive images, logical headings, and responsive layouts are release requirements.</p></article>
+          <article class="card"><p class="card-number">05</p><h3>Scope is a component</h3><p>What the internship did not include is displayed with the same design quality as the positive evidence.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Color tokens</p>
+          <h2>Dark infrastructure, blue information, green verification, orange caution</h2>
+          <p>The palette is encoded as CSS custom properties in <code>styles.css</code>. Color never communicates status by itself.</p>
+        </div>
+        <div class="token-grid">
+          <div class="token-card"><div class="swatch" style="background:#071426"></div><div class="token-card__body"><strong>Navy 950</strong><code>#071426</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#0a1d35"></div><div class="token-card__body"><strong>Navy 900</strong><code>#0a1d35</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#12345c"></div><div class="token-card__body"><strong>Navy 800</strong><code>#12345c</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#175cd3"></div><div class="token-card__body"><strong>Blue 700</strong><code>#175cd3</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#2474e5"></div><div class="token-card__body"><strong>Blue 600</strong><code>#2474e5</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#dcecff"></div><div class="token-card__body"><strong>Blue 100</strong><code>#dcecff</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#047857"></div><div class="token-card__body"><strong>Green 700</strong><code>#047857</code></div></div>
+          <div class="token-card"><div class="swatch" style="background:#ff9900"></div><div class="token-card__body"><strong>Orange accent</strong><code>#ff9900</code></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Typography and spacing</p>
+          <h2>Readable system fonts and a four-pixel rhythm</h2>
+        </div>
+        <div class="grid two-up">
+          <div class="component-demo">
+            <p class="eyebrow" style="color:#175cd3">Eyebrow / metadata</p>
+            <h2 style="margin:0;font-size:clamp(2rem,4vw,3.4rem);line-height:1.08">Section heading with a clear technical claim</h2>
+            <p style="font-size:1.08rem;color:#475569">Lead text carries context and qualification without making the heading unreadably long.</p>
+            <p>Body copy uses the system UI stack at a 1.65 line height so dense technical material remains readable.</p>
+          </div>
+          <div class="component-demo">
+            <h3>Spacing scale</h3>
+            <p><code>4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64 · 80</code></p>
+            <h3>Content width</h3>
+            <p><code>--content: 1160px</code></p>
+            <h3>Responsive rules</h3>
+            <p>Three columns collapse to two below 980px. Multi-column content collapses to one below 720px. Code blocks scroll internally.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Component contracts</p>
+          <h2>Reusable surfaces with explicit jobs</h2>
+        </div>
+        <div class="component-demo">
+          <h3>Buttons and links</h3>
+          <div class="inline-links"><a class="text-button" href="#components">Outlined action</a><a class="button primary" style="background:#071426;color:#fff;border-color:#071426" href="#components">Primary action</a><a href="#components">Inline evidence link</a></div>
+        </div>
+        <div class="component-demo" id="components">
+          <h3>Status surfaces</h3>
+          <div class="grid two-up">
+            <article class="card success"><h3>Verified behavior</h3><ul class="check-list"><li>Uses explicit language and a check indicator.</li><li>Links to implementation or official source.</li></ul></article>
+            <article class="card warning"><h3>Scope or cleanup warning</h3><ul class="plain-list"><li>Explains what is not claimed.</li><li>Does not hide cost, uncertainty, or retained data.</li></ul></article>
+          </div>
+        </div>
+        <div class="component-demo">
+          <h3>Code panel</h3>
+          <div class="code-panel">
+            <div class="code-title"><span>Small load-bearing excerpt</span><a href="https://github.com/BradleyMatera/Office/blob/main/src/metadata_extractor/app.py">Open full source</a></div>
+            <pre><code>metadata_table.put_item(
+    Item=item,
+    ConditionExpression="attribute_not_exists(RecordId)",
+)</code></pre>
+          </div>
+        </div>
+        <div class="component-demo">
+          <h3>Native FAQ disclosure</h3>
+          <div class="faq-list"><details><summary>Why use native details and summary?</summary><p>They provide keyboard and screen-reader behavior without adding JavaScript or custom state management.</p></details></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Illustration language</p>
+          <h2>Every graphic explains a system or decision</h2>
+          <p>First-party SVGs avoid copied service logos and unverified screenshots. Each graphic includes internal title and description elements plus surrounding explanatory text.</p>
+        </div>
+        <div class="article-grid">
+          <div class="article-card"><div class="article-card__media"><img src="assets/content/internship-console.svg" alt="Internship troubleshooting illustration." /></div><div class="article-card__body"><h3>Operational console</h3><p>Logs, event flow, function logic, metadata records, and a repeated observe-isolate-verify-document loop.</p></div></div>
+          <div class="article-card"><div class="article-card__media"><img src="assets/content/aws-cost-radar.svg" alt="Cloud cost radar illustration." /></div><div class="article-card__body"><h3>Cost radar</h3><p>Resources, thresholds, cleanup state, request volume, duration, storage, and retention.</p></div></div>
+          <div class="article-card"><div class="article-card__media"><img src="assets/content/projecthub-recruiter.svg" alt="ProjectHub grounded recruiter assistant illustration." /></div><div class="article-card__body"><h3>Grounded knowledge</h3><p>Recruiter questions move through verified source material before a final answer is presented.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Accessibility acceptance</p>
+          <h2>A release is not done when it only looks good</h2>
+        </div>
+        <div class="grid two-up">
+          <article class="card success"><h3>Required before release</h3><ul class="check-list"><li>Unique title, description, canonical URL, and visible h1.</li><li>Skip link and main landmark.</li><li>Logical heading levels.</li><li>Descriptive alternative text for meaningful images.</li><li>Visible keyboard focus and keyboard-operable controls.</li><li>Responsive behavior without full-page horizontal scrolling.</li><li>Reduced-motion and forced-colors handling.</li></ul></article>
+          <article class="card"><h3>Production checks</h3><ul class="plain-list"><li>JSON-LD parses successfully.</li><li>Local assets and links resolve.</li><li>Robots and sitemap agree.</li><li>Pages health workflow can fetch critical URLs.</li><li>Python, SAM, and site validation pass together.</li></ul></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-kicker">Content governance</p>
+          <h2>The visual system also protects the truth of the project</h2>
+        </div>
+        <table class="verification-table">
+          <thead><tr><th>Content area</th><th>Source of truth</th><th>Rule</th></tr></thead>
+          <tbody>
+            <tr><td>Article dates and slugs</td><td>MDX frontmatter in the public blog repository</td><td>Do not trust a search UI date when it conflicts with source metadata.</td></tr>
+            <tr><td>AWS service behavior</td><td>Current official AWS documentation</td><td>Secondary tutorials are not authoritative for load-bearing claims.</td></tr>
+            <tr><td>Internship scope</td><td>Canonical resume facts and bounded internship article</td><td>Training work never silently becomes production ownership.</td></tr>
+            <tr><td>Repository proof</td><td>Current public code and deployment artifacts</td><td>Forks and design plans are not presented as original deployed systems.</td></tr>
+          </tbody>
+        </table>
+        <p class="center-link"><a class="text-button" href="docs/design-system.md">Open the complete Markdown specification</a></p>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container mini-cta">
+        <div><p class="section-kicker">See the system in use</p><h2>The workflow, writing, proof, and source pages all use this contract</h2><p>Move through the public site and the component language, accessibility rules, and truth boundaries remain consistent.</p></div>
+        <div class="inline-links"><a class="text-button" href="index.html">Workflow</a><a class="text-button" href="writing.html">Writing</a><a class="text-button" href="proof.html">Proof</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p><strong>AWS Evidence Design System 1.0.0</strong> · Bradley Matera</p>
+      <p><a href="index.html">Workflow</a><span>·</span><a href="writing.html">Writing</a><span>·</span><a href="proof.html">Proof</a><span>·</span><a href="sources.html">Sources</a></p>
+      <p class="footer-note">System fonts, first-party SVGs, no required JavaScript, and explicit accessibility and content-governance contracts.</p>
+    </div>
+  </footer>
+</body>
+</html>
