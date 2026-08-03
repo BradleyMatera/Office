@@ -6,11 +6,22 @@ Description: >-
   records in an encrypted DynamoDB table.
 
 Parameters:
+  InputPrefix:
+    Type: String
+    Default: incoming/
+    Description: Only object-created events under this S3 key prefix invoke the extractor.
   LogRetentionDays:
     Type: Number
     Default: 14
     AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90]
     Description: CloudWatch Logs retention period for the Lambda function.
+  AlarmEmail:
+    Type: String
+    Default: ''
+    Description: Optional email address for Lambda error, throttle, and failure-queue alerts.
+
+Conditions:
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
 
 Globals:
   Function:
@@ -34,6 +45,9 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -80,6 +94,18 @@ Resources:
         - Key: Project
           Value: aws-serverless-metadata-workflow
 
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Condition: HasAlarmEmail
+    Properties:
+      DisplayName: AWS Metadata Workflow Alerts
+      Subscription:
+        - Endpoint: !Ref AlarmEmail
+          Protocol: email
+      Tags:
+        - Key: Project
+          Value: aws-serverless-metadata-workflow
+
   MetadataExtractorFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -100,6 +126,11 @@ Resources:
           Properties:
             Bucket: !Ref UploadBucket
             Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: !Ref InputPrefix
       EventInvokeConfig:
         MaximumEventAgeInSeconds: 3600
         MaximumRetryAttempts: 2
@@ -133,11 +164,60 @@ Resources:
       Threshold: 1
       ComparisonOperator: GreaterThanOrEqualToThreshold
       TreatMissingData: notBreaching
+      AlarmActions: !If
+        - HasAlarmEmail
+        - - !Ref AlarmTopic
+        - !Ref AWS::NoValue
+
+  MetadataExtractorThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Alerts when the metadata extractor is throttled.
+      Namespace: AWS/Lambda
+      MetricName: Throttles
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref MetadataExtractorFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If
+        - HasAlarmEmail
+        - - !Ref AlarmTopic
+        - !Ref AWS::NoValue
+
+  FailureQueueDepthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Alerts when failed metadata events are waiting for investigation.
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt FailureQueue.QueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If
+        - HasAlarmEmail
+        - - !Ref AlarmTopic
+        - !Ref AWS::NoValue
 
 Outputs:
   UploadBucketName:
-    Description: Upload files here to trigger metadata extraction.
+    Description: Upload files under the configured prefix to trigger metadata extraction.
     Value: !Ref UploadBucket
+  UploadPrefix:
+    Description: S3 key prefix monitored by the metadata extractor.
+    Value: !Ref InputPrefix
   MetadataTableName:
     Description: DynamoDB table containing normalized metadata records.
     Value: !Ref MetadataTable
@@ -147,3 +227,7 @@ Outputs:
   FailureQueueUrl:
     Description: Queue receiving events that still fail after asynchronous retries.
     Value: !Ref FailureQueue
+  AlarmTopicArn:
+    Condition: HasAlarmEmail
+    Description: SNS topic used for operational email alerts.
+    Value: !Ref AlarmTopic
